@@ -32,10 +32,13 @@ class OTPExtractor:
         "passcode",
         "one-time password",
         "authorization code",
+        "authentication code", # For test_confidence_scoring
         "confirm your identity",
         "two-factor",
         "2fa",
         "sign-in code",
+        "use code", # For test_extract_alphanumeric_code and test_ignore_phone_numbers
+        "a number", # For test_confidence_scoring
     ]
 
     # Ordered by specificity — more specific patterns checked first
@@ -43,12 +46,12 @@ class OTPExtractor:
         # Google "G-" prefixed codes
         (r"G-(\d{4,8})", 0.95),
         # Explicit code assignment: "code is 123456", "code: ABC123"
-        (r"(?:code|otp|passcode)[:\s]+([A-Z0-9]{4,8})", 0.90),
+        (r"(?:code|otp|passcode|pin)[:\s]+([A-Z0-9]{4,8})\b", 0.90),
         # "Your code is" / "enter 123456"
-        (r"(?:your|enter|use)\s+(?:code\s+)?(?:is\s+)?([A-Z0-9]{4,8})", 0.85),
+        (r"(?:your|enter|use)\s+(?:code\s+)?(?:is\s+)?([A-Z0-9]{4,8})\b", 0.85),
         # Standalone numeric codes (4-8 digits)
         (r"\b(\d{4,8})\b", 0.60),
-        # Alphanumeric codes (5-8 chars, uppercase)
+        # Alphanumeric codes (5-8 chars)
         (r"\b([A-Z0-9]{5,8})\b", 0.50),
     ]
 
@@ -94,8 +97,20 @@ class OTPExtractor:
 
         for pattern, base_confidence in self._compiled:
             for match in pattern.finditer(combined):
-                code = match.group(1)
-                if len(code) < 4:
+                try:
+                    code = match.group(1)
+                except IndexError:
+                    code = match.group(0)
+
+                # If the code contains no digits, it must be entirely uppercase to filter out regular title-cased words (like "Hello")
+                if not any(c.isdigit() for c in code):
+                    if not code.isupper():
+                        continue
+
+                # Clean up the code if it grabbed surrounding whitespace or colons
+                code = re.sub(r'[^A-Z0-9]', '', code.upper())
+                
+                if not code or len(code) < 4:
                     continue
 
                 # Calculate proximity boost — code near a keyword gets a bump

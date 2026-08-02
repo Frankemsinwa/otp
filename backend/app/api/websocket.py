@@ -18,15 +18,17 @@ class ConnectionManager:
         self.pubsub = None
         self.channel_name = "otp_live_feed"
         self._listener_task: asyncio.Task | None = None
+        self._lock = asyncio.Lock()
 
     async def connect_redis(self):
         """Initialize Redis connection and start pub/sub listener."""
-        if not self.redis:
-            self.redis = Redis.from_url(settings.REDIS_URL, decode_responses=True)
-            self.pubsub = self.redis.pubsub()
-            await self.pubsub.subscribe(self.channel_name)
-            self._listener_task = asyncio.create_task(self._listen_to_redis())
-            log.info("WebSocket Manager connected to Redis pub/sub")
+        async with self._lock:
+            if not self.redis:
+                self.redis = Redis.from_url(settings.REDIS_URL, decode_responses=True)
+                self.pubsub = self.redis.pubsub()
+                await self.pubsub.subscribe(self.channel_name)
+                self._listener_task = asyncio.create_task(self._listen_to_redis())
+                log.info("WebSocket Manager connected to Redis pub/sub")
 
     async def disconnect_redis(self):
         """Cleanup Redis connection."""

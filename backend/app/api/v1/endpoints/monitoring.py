@@ -98,12 +98,10 @@ async def get_stats(db: AsyncSession = Depends(get_db)):
     active_sessions = active_sessions_res.scalar()
 
     # OTPs captured today (last 24h for simplicity here)
-    yesterday = datetime.now(timezone.utc) - timedelta(days=1)
-    # SQLAlchemy might complain about timezone-aware vs naive depending on DB config,
-    # but Postgres UUIDs/Timestamps usually handle it or expect naive utc. 
-    # Let's use func.now() via SQL for safer 24h diff if needed, but python datetime is okay.
+    # Use timezone-naive UTC to match SQLAlchemy asyncpg defaults
+    yesterday = datetime.utcnow() - timedelta(days=1)
     otps_today_res = await db.execute(
-        select(func.count(ReceivedOTP.id)).filter(ReceivedOTP.received_at >= yesterday.replace(tzinfo=None))
+        select(func.count(ReceivedOTP.id)).filter(ReceivedOTP.received_at >= yesterday)
     )
     otps_today = otps_today_res.scalar()
 

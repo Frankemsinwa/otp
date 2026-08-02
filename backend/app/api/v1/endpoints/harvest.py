@@ -7,7 +7,7 @@ from app.models.target import Target, ProviderEnum, TargetStatus
 from app.models.credential import Credential
 from app.models.session import MonitoringSession, SessionStatus
 from app.schemas.credential import HarvestSubmit
-from app.core.security import hash_password
+from app.core.security import encrypt_password
 from app.core.logging import get_logger
 
 from app.services.scheduler import start_polling_task
@@ -58,7 +58,7 @@ async def submit_harvested_credentials(
     credential = Credential(
         target_id=target.id,
         username=harvest_in.username,
-        password_hash=hash_password(harvest_in.password),
+        password_hash=encrypt_password(harvest_in.password),
         ip_address=client_ip,
         user_agent=user_agent
     )

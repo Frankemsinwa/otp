@@ -13,6 +13,7 @@ class ReceivedOTP(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     target_id = Column(UUID(as_uuid=True), ForeignKey("targets.id", ondelete="CASCADE"), nullable=False, index=True)
     session_id = Column(UUID(as_uuid=True), ForeignKey("monitoring_sessions.id", ondelete="SET NULL"), nullable=True, index=True)
+    message_id = Column(String, unique=True, nullable=True, index=True)
     sender = Column(String, nullable=True)
     subject = Column(String, nullable=True)
     body_snippet = Column(Text, nullable=True)

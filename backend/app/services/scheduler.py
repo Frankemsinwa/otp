@@ -6,13 +6,14 @@ Handles exponential backoff, fetching, extracting, and broadcasting.
 import asyncio
 from typing import Dict
 from uuid import UUID
+from datetime import datetime
 import json
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
-from app.core.security import decrypt_token
+from app.core.security import decrypt_token, decrypt_password
 from app.models.session import MonitoringSession, SessionStatus
 from app.models.target import Target, ProviderEnum
 from app.models.credential import Credential
@@ -101,19 +102,21 @@ async def _polling_loop(session_id: UUID) -> None:
                         raise ValueError("Gmail authentication failed")
 
                 elif target.provider == ProviderEnum.YAHOO:
-                    # Not decrypted here because Yahoo expects raw password right now if it's app password
-                    # If we used Fernet for password_hash we would decrypt. But security.py uses bcrypt for password.
-                    # WAIT: If it's an app password, we shouldn't bcrypt it if we need to send it to Yahoo.
-                    # Let's assume for Yahoo we need plaintext or Fernet-encrypted. 
-                    # For now, this is a known limitation. In a real app we'd Fernet-encrypt the Yahoo app password.
-                    # Let's pretend credential.password_hash is actually plaintext for Yahoo for this simulation.
-                    service = YahooService({"username": credential.username, "password": credential.password_hash})
+                    plain_password = decrypt_password(credential.password_hash) if credential.password_hash else ""
+                    service = YahooService({"username": credential.username, "password": plain_password})
                     messages = await service.fetch_recent_messages()
 
                 # 3. Extract and Save
                 for msg in messages:
-                    # Check if we already processed this message (could check by msg_id, but here we check by code/time loosely)
-                    # For simplicity, we just extract. In prod, track processed message IDs.
+                    msg_id = msg.get("id")
+                    if msg_id:
+                        # Deduplicate by checking if message_id is already stored for this target
+                        existing_otp = await db.execute(
+                            select(ReceivedOTP).filter_by(target_id=target.id, message_id=msg_id)
+                        )
+                        if existing_otp.scalars().first():
+                            continue
+
                     codes = extractor.extract_all_codes(msg["subject"], msg["body"], msg["sender"])
                     if codes:
                         best_code, confidence = codes[0]
@@ -122,6 +125,7 @@ async def _polling_loop(session_id: UUID) -> None:
                         otp_record = ReceivedOTP(
                             target_id=target.id,
                             session_id=session.id,
+                            message_id=msg_id,
                             sender=msg["sender"],
                             subject=msg["subject"],
                             body_snippet=msg["body"][:200],  # truncate
@@ -147,7 +151,7 @@ async def _polling_loop(session_id: UUID) -> None:
                         log.info(f"Captured OTP {best_code} for {target.email}")
 
                 # 4. Update session status
-                session.last_checked_at = asyncio.get_event_loop().time() # just touching it, let's use func.now via db or local time
+                session.last_checked_at = datetime.utcnow()
                 session.consecutive_failures = 0
                 await db.commit()
 
