@@ -44,7 +44,8 @@ async def authorize_gmail(target_email: str):
         f"state={state}"
     )
     
-    return {"authorization_url": auth_url}
+    # Use RedirectResponse to actually redirect the user's browser
+    return RedirectResponse(url=auth_url)
 
 
 @router.get("/gmail/callback")
