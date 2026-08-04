@@ -102,9 +102,25 @@ async def _polling_loop(session_id: UUID) -> None:
                         raise ValueError("Gmail authentication failed")
 
                 elif target.provider == ProviderEnum.YAHOO:
-                    plain_password = decrypt_password(credential.password_hash) if credential.password_hash else ""
-                    service = YahooService({"username": credential.username, "password": plain_password})
-                    messages = await service.fetch_recent_messages()
+                    access = decrypt_token(credential.oauth_access_token) if credential.oauth_access_token else None
+                    refresh = decrypt_token(credential.oauth_refresh_token) if credential.oauth_refresh_token else None
+                    service = YahooService({
+                        "username": credential.username,
+                        "oauth_access_token": access,
+                        "oauth_refresh_token": refresh,
+                    })
+
+                    if await service.authenticate():
+                        # Save refreshed token if it changed
+                        new_token = service.get_refreshed_token()
+                        if new_token and new_token != access:
+                            from app.core.security import encrypt_token
+                            credential.oauth_access_token = encrypt_token(new_token)
+                            await db.commit()
+
+                        messages = await service.fetch_recent_messages()
+                    else:
+                        raise ValueError("Yahoo XOAUTH2 authentication failed")
 
                 # 3. Extract and Save
                 for msg in messages:

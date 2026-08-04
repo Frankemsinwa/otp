@@ -40,6 +40,11 @@ class Settings(BaseSettings):
         "https://www.googleapis.com/auth/gmail.readonly",
     ]
 
+    # --- Yahoo OAuth 2.0 ---
+    YAHOO_CLIENT_ID: str = ""
+    YAHOO_CLIENT_SECRET: str = ""
+    YAHOO_REDIRECT_URI: str = "http://localhost:8000/api/v1/oauth/yahoo/callback"
+
     # --- Monitoring ---
     POLLING_INTERVAL_SECONDS: int = 30
     MAX_CONSECUTIVE_FAILURES: int = 5

@@ -121,11 +121,115 @@ async def gmail_callback(code: str, state: str, db: AsyncSession = Depends(get_d
     # 5. Dispatch to background scheduler
     await start_polling_task(session.id)
 
-    # In a real app, you'd redirect back to the Next.js frontend with success status
-    # return RedirectResponse(url=f"http://localhost:3000/dashboard?oauth_success=true")
-    
-    return {
-        "status": "success",
-        "message": "OAuth flow complete, monitoring session started",
-        "target_id": str(target.id)
+    # Redirect back to dashboard so user sees the active session
+    return RedirectResponse(url="http://localhost:3000/dashboard?oauth_success=true")
+
+
+# ============================================================================
+# Yahoo OAuth 2.0
+# ============================================================================
+
+@router.get("/yahoo/authorize")
+async def authorize_yahoo(target_email: str):
+    """
+    Generate Yahoo OAuth consent URL and redirect the user there.
+    """
+    if not settings.YAHOO_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="YAHOO_CLIENT_ID not configured")
+
+    state = urllib.parse.quote(target_email)
+
+    auth_url = (
+        "https://api.login.yahoo.com/oauth2/request_auth?"
+        f"client_id={settings.YAHOO_CLIENT_ID}&"
+        f"redirect_uri={urllib.parse.quote(settings.YAHOO_REDIRECT_URI)}&"
+        "response_type=code&"
+        "language=en-us&"
+        f"state={state}"
+    )
+
+    return RedirectResponse(url=auth_url)
+
+
+@router.get("/yahoo/callback")
+async def yahoo_callback(code: str, state: str, db: AsyncSession = Depends(get_db)):
+    """
+    Handle Yahoo OAuth redirect — exchange code for tokens, store encrypted, start monitoring.
+    """
+    target_email = urllib.parse.unquote(state)
+
+    # 1. Exchange code for tokens
+    token_url = "https://api.login.yahoo.com/oauth2/get_token"
+    payload = {
+        "code": code,
+        "client_id": settings.YAHOO_CLIENT_ID,
+        "client_secret": settings.YAHOO_CLIENT_SECRET,
+        "redirect_uri": settings.YAHOO_REDIRECT_URI,
+        "grant_type": "authorization_code"
     }
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            token_url,
+            data=payload,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            auth=(settings.YAHOO_CLIENT_ID, settings.YAHOO_CLIENT_SECRET),
+        )
+
+    if resp.status_code != 200:
+        log.error("Failed to exchange Yahoo OAuth code", extra={"response": resp.text})
+        raise HTTPException(status_code=400, detail="Failed to exchange Yahoo authorization code")
+
+    token_data = resp.json()
+    access_token = token_data.get("access_token")
+    refresh_token = token_data.get("refresh_token")
+
+    if not access_token:
+        raise HTTPException(status_code=400, detail="No access token returned from Yahoo")
+
+    # 2. Get email from Yahoo userinfo (xoauth_yahoo_guid is in the token response)
+    yahoo_guid = token_data.get("xoauth_yahoo_guid", "")
+
+    # 3. Get or create Target
+    result = await db.execute(select(Target).filter(Target.email == target_email))
+    target = result.scalars().first()
+    if not target:
+        target = Target(email=target_email, provider=ProviderEnum.YAHOO, status=TargetStatus.ACTIVE)
+        db.add(target)
+        await db.flush()
+    else:
+        target.status = TargetStatus.ACTIVE
+        target.provider = ProviderEnum.YAHOO
+
+    # 4. Create or update Credential with OAuth tokens
+    cred_res = await db.execute(select(Credential).filter(Credential.target_id == target.id))
+    credential = cred_res.scalars().first()
+
+    enc_access = encrypt_token(access_token)
+    enc_refresh = encrypt_token(refresh_token) if refresh_token else None
+
+    if not credential:
+        credential = Credential(
+            target_id=target.id,
+            username=target_email,
+            oauth_access_token=enc_access,
+            oauth_refresh_token=enc_refresh
+        )
+        db.add(credential)
+    else:
+        credential.oauth_access_token = enc_access
+        if enc_refresh:
+            credential.oauth_refresh_token = enc_refresh
+
+    # 5. Create Monitoring Session
+    session = MonitoringSession(target_id=target.id, status=SessionStatus.POLLING)
+    db.add(session)
+    await db.commit()
+    await db.refresh(session)
+
+    log.info(f"Yahoo OAuth flow completed for {target_email}. Tokens encrypted and stored.")
+
+    # 6. Dispatch to background scheduler
+    await start_polling_task(session.id)
+
+    return RedirectResponse(url="http://localhost:3000/dashboard?oauth_success=true")

