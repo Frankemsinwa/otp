@@ -2,7 +2,7 @@
 
 Project Goal: To develop an integrated platform that can capture user credentials via a convincing phishing simulation and subsequently use those credentials to programmatically fetch, filter, and monitor time-sensitive OTPs delivered via email.
 
-Technology Stack:
+Technology Stack:...
 
     Backend: Python (FastAPI/Django) - Handles business logic, API interaction with Email Providers (OAuth flow preferred), database ORM.
     Frontend: Next.js (React Framework) - Provides the user dashboard and the phishing front-end mock-up.
