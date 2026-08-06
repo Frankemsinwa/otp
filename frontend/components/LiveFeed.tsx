@@ -13,6 +13,7 @@ interface FeedEntry {
 export function LiveFeed() {
   const [entries, setEntries] = useState<FeedEntry[]>([]);
   const [connected, setConnected] = useState(false);
+  const [highlightedEntryId, setHighlightedEntryId] = useState<string | null>(null); // New state for highlighting
   const wsRef = useRef<WebSocket | null>(null);
   const retryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const connectRef = useRef<() => void>(() => {});
@@ -27,12 +28,14 @@ export function LiveFeed() {
     ws.onmessage = (event) => {
       try {
         const payload = JSON.parse(event.data as string) as OTPBroadcast;
+        const newEntry = { id: crypto.randomUUID(), payload, received_at: Date.now() };
         setEntries((prev) =>
           [
-            { id: crypto.randomUUID(), payload, received_at: Date.now() },
+            newEntry,
             ...prev,
           ].slice(0, 100)
         );
+        setHighlightedEntryId(newEntry.id); // Highlight the new entry
       } catch {
         // Ignore non-JSON keepalive messages (e.g. "pong").
       }
@@ -60,20 +63,42 @@ export function LiveFeed() {
     return connect();
   }, [connect]);
 
+  // Effect to clear highlight after a short duration
+  useEffect(() => {
+    if (highlightedEntryId) {
+      const timer = setTimeout(() => {
+        setHighlightedEntryId(null);
+      }, 1500); // Highlight for 1.5 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [highlightedEntryId]);
+
+  const handleClearFeed = () => {
+    setEntries([]);
+  };
+
   return (
     <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
         <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
           Live OTP Feed
         </h2>
-        <span className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-          <span
-            className={`h-2 w-2 rounded-full ${
-              connected ? "bg-emerald-500" : "bg-red-500"
-            }`}
-          />
-          {connected ? "Connected" : "Disconnected"}
-        </span>
+        <div className="flex items-center gap-4"> {/* Group connection status and clear button */}
+          <button
+            onClick={handleClearFeed}
+            className="text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+          >
+            Clear Feed
+          </button>
+          <span className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                connected ? "bg-emerald-500" : "bg-red-500"
+              }`}
+            />
+            {connected ? "Connected" : "Disconnected"}
+          </span>
+        </div>
       </div>
 
       {entries.length === 0 ? (
@@ -83,12 +108,17 @@ export function LiveFeed() {
       ) : (
         <ul className="max-h-[480px] divide-y divide-zinc-200 overflow-y-auto dark:divide-zinc-800">
           {entries.map((entry) => (
-            <li key={entry.id} className="px-5 py-3">
+            <li
+              key={entry.id}
+              className={`px-5 py-3 transition-colors duration-500 ${
+                entry.id === highlightedEntryId ? "bg-blue-100 dark:bg-blue-900" : "" // Highlight class
+              }`}
+            >
               <div className="flex items-center justify-between gap-3">
                 <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">
                   {entry.payload.target_email}
                 </p>
-                <code className="shrink-0 rounded bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
+                <code className="shrink-0 rounded bg-zinc-100 px-3 py-1 text-sm font-bold text-zinc-800 dark:bg-zinc-800 dark:text-zinc-100"> {/* Enhanced OTP display */}
                   {entry.payload.extracted_code}
                 </code>
               </div>
