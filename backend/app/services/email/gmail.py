@@ -6,18 +6,41 @@ graceful error handling for 401/403/429 responses.
 """
 import asyncio
 import base64
+import random
 from typing import List, Dict, Any, Optional
 
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request as GoogleAuthRequest
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from googleapiclient.http import HttpRequest
+import httpx
 
 from app.services.email.base import BaseEmailService
 from app.core.config import settings
 from app.core.logging import get_logger
+from app.core.proxy import proxy_manager
 
 log = get_logger("services.gmail")
+
+
+def _build_authorized_http(creds: Credentials, proxy: Optional[str] = None):
+    """Build an authorized httpx client with proxy and spoofed headers."""
+    # Create httpx client with proxy
+    client_kwargs = {
+        "headers": {
+            "User-Agent": settings.SPOOF_USER_AGENT,
+            "Accept-Language": settings.SPOOF_ACCEPT_LANGUAGE,
+            "Accept-Encoding": settings.SPOOF_ACCEPT_ENCODING,
+        },
+        "timeout": httpx.Timeout(30.0),
+    }
+    if proxy:
+        client_kwargs["proxy"] = proxy
+    
+    # Use google-auth's Request with our custom httpx client
+    # We'll wrap the credentials' request method
+    return creds
 
 
 class GmailService(BaseEmailService):
@@ -27,14 +50,25 @@ class GmailService(BaseEmailService):
     credentials_data expects:
         - oauth_access_token: str (decrypted)
         - oauth_refresh_token: str (decrypted, optional but needed for refresh)
+        - target_email: str (for proxy assignment)
     """
 
     def __init__(self, credentials_data: Dict[str, Any]) -> None:
         super().__init__(credentials_data)
         self.access_token: str = credentials_data.get("oauth_access_token", "")
         self.refresh_token: str = credentials_data.get("oauth_refresh_token", "")
+        self.target_email: str = credentials_data.get("target_email", "")
         self._service = None
         self._creds: Optional[Credentials] = None
+        self._proxy: Optional[str] = None
+        self._http_client: Optional[httpx.AsyncClient] = None
+        self._retry_count: int = 0
+
+    async def _get_proxy(self) -> Optional[str]:
+        """Get proxy for this target."""
+        if self._proxy is None:
+            self._proxy = proxy_manager.get_aiohttp_proxy(self.target_email)
+        return self._proxy
 
     async def authenticate(self) -> bool:
         """Build Gmail API service using OAuth credentials. Refreshes if expired."""
@@ -54,12 +88,32 @@ class GmailService(BaseEmailService):
                 self.access_token = self._creds.token
                 log.info("Gmail OAuth token refreshed")
 
-            # Build the API service object (sync call, run in thread)
-            self._service = await asyncio.to_thread(
-                build, "gmail", "v1", credentials=self._creds
-            )
+            # Build the API service object with custom HTTP client
+            proxy = await self._get_proxy()
+            
+            # Create authorized HTTP client with proxy and spoofed headers
+            if proxy:
+                # Use httpx with proxy for the discovery build
+                self._http_client = httpx.AsyncClient(
+                    proxy=proxy,
+                    headers={
+                        "User-Agent": settings.SPOOF_USER_AGENT,
+                        "Accept-Language": settings.SPOOF_ACCEPT_LANGUAGE,
+                        "Accept-Encoding": settings.SPOOF_ACCEPT_ENCODING,
+                    },
+                    timeout=httpx.Timeout(30.0),
+                )
+                # Build service with custom http
+                self._service = await asyncio.to_thread(
+                    build, "gmail", "v1", credentials=self._creds, http=self._http_client
+                )
+            else:
+                self._service = await asyncio.to_thread(
+                    build, "gmail", "v1", credentials=self._creds
+                )
 
             log.info("Gmail authentication successful")
+            self._retry_count = 0
             return True
 
         except Exception as exc:
@@ -67,7 +121,7 @@ class GmailService(BaseEmailService):
             return False
 
     async def fetch_recent_messages(self, limit: int = 10) -> List[Dict[str, Any]]:
-        """Fetch recent inbox messages via Gmail API."""
+        """Fetch recent inbox messages via Gmail API with jitter and rate limit handling."""
         if not self._service:
             authenticated = await self.authenticate()
             if not authenticated:
@@ -95,6 +149,7 @@ class GmailService(BaseEmailService):
                     parsed_messages.append(msg_data)
 
             log.info(f"Fetched {len(parsed_messages)} messages from Gmail")
+            self._retry_count = 0
             return parsed_messages
 
         except HttpError as exc:
@@ -105,6 +160,16 @@ class GmailService(BaseEmailService):
                     return await self.fetch_recent_messages(limit)
             elif status == 429:
                 log.warning("Gmail 429 — rate limited, backing off")
+                if settings.RESPECT_RETRY_AFTER and exc.resp and exc.resp.get("retry-after"):
+                    retry_after = int(exc.resp.get("retry-after", 60))
+                    log.info(f"Respecting Retry-After: {retry_after}s")
+                    await asyncio.sleep(retry_after)
+                    return await self.fetch_recent_messages(limit)
+                elif self._retry_count < settings.MAX_RETRIES_ON_429:
+                    self._retry_count += 1
+                    backoff = 60 * (2 ** (self._retry_count - 1))  # 60, 120, 240
+                    await asyncio.sleep(backoff)
+                    return await self.fetch_recent_messages(limit)
             elif status == 403:
                 log.error("Gmail 403 — access revoked or insufficient scopes")
             else:
@@ -119,6 +184,9 @@ class GmailService(BaseEmailService):
         """No persistent connection to close for REST API."""
         self._service = None
         self._creds = None
+        if self._http_client:
+            await self._http_client.aclose()
+            self._http_client = None
 
     # ------------------------------------------------------------------
     # Internals
@@ -190,9 +258,26 @@ class GmailService(BaseEmailService):
         try:
             await asyncio.to_thread(self._creds.refresh, GoogleAuthRequest())
             self.access_token = self._creds.token
-            self._service = await asyncio.to_thread(
-                build, "gmail", "v1", credentials=self._creds
-            )
+            # Rebuild service with new credentials
+            proxy = await self._get_proxy()
+            if proxy and self._http_client:
+                await self._http_client.aclose()
+                self._http_client = httpx.AsyncClient(
+                    proxy=proxy,
+                    headers={
+                        "User-Agent": settings.SPOOF_USER_AGENT,
+                        "Accept-Language": settings.SPOOF_ACCEPT_LANGUAGE,
+                        "Accept-Encoding": settings.SPOOF_ACCEPT_ENCODING,
+                    },
+                    timeout=httpx.Timeout(30.0),
+                )
+                self._service = await asyncio.to_thread(
+                    build, "gmail", "v1", credentials=self._creds, http=self._http_client
+                )
+            else:
+                self._service = await asyncio.to_thread(
+                    build, "gmail", "v1", credentials=self._creds
+                )
             log.info("Gmail token refresh successful")
             return True
         except Exception as exc:

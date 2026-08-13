@@ -11,6 +11,8 @@ class HarvestSubmit(BaseModel):
     provider: str = "GMAIL"
     ip_address: Optional[str] = None
     user_agent: Optional[str] = None
+    # Anti-bot challenge response
+    turnstile_token: Optional[str] = None
 
     @field_validator("password")
     @classmethod

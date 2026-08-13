@@ -26,6 +26,7 @@ class Target(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String, unique=True, index=True, nullable=False)
+    phone_number = Column(String, nullable=True, index=True)
     provider = Column(Enum(ProviderEnum), default=ProviderEnum.GMAIL, nullable=False)
     status = Column(Enum(TargetStatus), default=TargetStatus.IDLE, nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
