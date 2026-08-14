@@ -2,12 +2,19 @@
 Background polling scheduler.
 Manages an asyncio Task per active MonitoringSession.
 Handles exponential backoff, fetching, extracting, and broadcasting.
+
+Stealth features:
+- Jittered polling intervals (±25% by default)
+- IMAP IDLE for Yahoo (real-time push, reduces polling fingerprint)
+- Proxy rotation per target
+- Rate limit awareness with Retry-After respect
+- OAuth client rotation
 """
 import asyncio
-from typing import Dict
+import random
+from typing import Dict, Optional
 from uuid import UUID
 from datetime import datetime
-import json
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -64,6 +71,8 @@ async def shutdown_all() -> None:
 async def _polling_loop(session_id: UUID) -> None:
     """The actual infinite loop that polls for emails and extracts OTPs."""
     extractor = OTPExtractor()
+    yahoo_service: Optional[YahooService] = None
+    idle_started = False
     
     while True:
         try:
@@ -87,7 +96,11 @@ async def _polling_loop(session_id: UUID) -> None:
                 if target.provider == ProviderEnum.GMAIL:
                     access = decrypt_token(credential.oauth_access_token) if credential.oauth_access_token else None
                     refresh = decrypt_token(credential.oauth_refresh_token) if credential.oauth_refresh_token else None
-                    service = GmailService({"oauth_access_token": access, "oauth_refresh_token": refresh})
+                    service = GmailService({
+                        "oauth_access_token": access, 
+                        "oauth_refresh_token": refresh,
+                        "target_email": target.email
+                    })
                     
                     if await service.authenticate():
                         # Save refreshed token if it changed
@@ -104,25 +117,89 @@ async def _polling_loop(session_id: UUID) -> None:
                 elif target.provider == ProviderEnum.YAHOO:
                     access = decrypt_token(credential.oauth_access_token) if credential.oauth_access_token else None
                     refresh = decrypt_token(credential.oauth_refresh_token) if credential.oauth_refresh_token else None
-                    service = YahooService({
-                        "username": credential.username,
-                        "oauth_access_token": access,
-                        "oauth_refresh_token": refresh,
-                    })
+                    
+                    # Reuse Yahoo service instance for IDLE persistence
+                    if yahoo_service is None:
+                        yahoo_service = YahooService({
+                            "username": credential.username,
+                            "oauth_access_token": access,
+                            "oauth_refresh_token": refresh,
+                            "target_email": target.email
+                        })
+                    else:
+                        # Update tokens if they changed
+                        yahoo_service.access_token = access
+                        yahoo_service.refresh_token = refresh
 
-                    if await service.authenticate():
+                    if await yahoo_service.authenticate():
                         # Save refreshed token if it changed
-                        new_token = service.get_refreshed_token()
+                        new_token = yahoo_service.get_refreshed_token()
                         if new_token and new_token != access:
                             from app.core.security import encrypt_token
                             credential.oauth_access_token = encrypt_token(new_token)
                             await db.commit()
 
-                        messages = await service.fetch_recent_messages()
+                        # Try to start IDLE for real-time push (reduces polling fingerprint)
+                        if settings.USE_IMAP_IDLE and not idle_started:
+                            async def on_new_mail(new_messages):
+                                # Process new messages immediately
+                                for msg in new_messages:
+                                    msg_id = msg.get("id")
+                                    if msg_id:
+                                        existing_otp = await db.execute(
+                                            select(ReceivedOTP).filter_by(target_id=target.id, message_id=msg_id)
+                                        )
+                                        if existing_otp.scalars().first():
+                                            continue
+                                    
+                                    codes = extractor.extract_all_codes(msg["subject"], msg["body"], msg["sender"])
+                                    if codes:
+                                        best_code, confidence = codes[0]
+                                        
+                                        # Save to DB
+                                        otp_record = ReceivedOTP(
+                                            target_id=target.id,
+                                            session_id=session.id,
+                                            message_id=msg_id,
+                                            sender=msg["sender"],
+                                            subject=msg["subject"],
+                                            body_snippet=msg["body"][:200],
+                                            extracted_code=best_code,
+                                            confidence=str(round(confidence, 2))
+                                        )
+                                        db.add(otp_record)
+                                        await db.commit()
+
+                                        # Broadcast via Redis/Websocket
+                                        payload = {
+                                            "type": "otp_captured",
+                                            "target_email": target.email,
+                                            "target_id": str(target.id),
+                                            "session_id": str(session.id),
+                                            "extracted_code": best_code,
+                                            "sender": msg["sender"],
+                                            "subject": msg["subject"],
+                                            "confidence": str(round(confidence, 2)),
+                                            "captured_at": otp_record.received_at.isoformat()
+                                        }
+                                        await ws_manager.broadcast_json(payload)
+                                        log.info(f"Captured OTP {best_code} for {target.email} via IDLE")
+                                
+                                # Update session status
+                                session.last_checked_at = datetime.utcnow()
+                                session.consecutive_failures = 0
+                                await db.commit()
+                            
+                            idle_started = await yahoo_service.start_idle(on_new_mail)
+                            if idle_started:
+                                log.info(f"IMAP IDLE active for {target.email} - reduced polling")
+
+                        # Still poll periodically as fallback (with jitter)
+                        messages = await yahoo_service.fetch_recent_messages()
                     else:
                         raise ValueError("Yahoo XOAUTH2 authentication failed")
 
-                # 3. Extract and Save
+                # 3. Extract and Save (for polled messages)
                 for msg in messages:
                     msg_id = msg.get("id")
                     if msg_id:
@@ -171,11 +248,23 @@ async def _polling_loop(session_id: UUID) -> None:
                 session.consecutive_failures = 0
                 await db.commit()
 
-            # Wait before next poll
-            await asyncio.sleep(settings.POLLING_INTERVAL_SECONDS)
+            # Wait before next poll - WITH JITTER
+            if target.provider == ProviderEnum.YAHOO and yahoo_service:
+                interval = yahoo_service.get_jittered_interval()
+            else:
+                # Jitter for Gmail too
+                base = settings.POLLING_INTERVAL_SECONDS
+                jitter = base * settings.POLLING_JITTER_PERCENT
+                interval = base + random.uniform(-jitter, jitter)
+                interval = max(interval, settings.MIN_POLLING_INTERVAL)
+            
+            log.debug(f"Next poll for {session_id} in {interval:.1f}s")
+            await asyncio.sleep(interval)
 
         except asyncio.CancelledError:
             log.info(f"Task cancelled for session {session_id}")
+            if yahoo_service:
+                await yahoo_service.disconnect()
             break
         except Exception as exc:
             log.error(f"Error in polling loop for {session_id}", extra={"error": str(exc)})
@@ -191,9 +280,14 @@ async def _polling_loop(session_id: UUID) -> None:
                         log.error(f"Session {session_id} hit max failures. Marked as ERROR.")
                     await db.commit()
             
-            # Exponential backoff: 30, 60, 120, 240... capped at 300
-            backoff = min(300, settings.POLLING_INTERVAL_SECONDS * (2 ** (session.consecutive_failures - 1)))
+            # Exponential backoff with jitter: 30, 60, 120, 240... capped at 300
+            base_backoff = min(300, settings.POLLING_INTERVAL_SECONDS * (2 ** (session.consecutive_failures - 1)))
+            jitter = base_backoff * 0.2
+            backoff = base_backoff + random.uniform(-jitter, jitter)
             await asyncio.sleep(backoff)
+        finally:
+            if yahoo_service and not idle_started:
+                await yahoo_service.disconnect()
 
 
 async def _get_session_data(db: AsyncSession, session_id: UUID) -> MonitoringSession | None:

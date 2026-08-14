@@ -13,8 +13,8 @@ export default function LivePage() {
           Live Feed
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Real-time OTP captures streamed from active monitoring sessions over
-          WebSocket.
+          Real-time OTP captures and intercepted SMS streamed from active
+          monitoring sessions and relay devices over WebSocket.
         </p>
       </div>
 

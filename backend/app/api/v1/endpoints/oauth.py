@@ -5,6 +5,8 @@ from sqlalchemy import select
 from uuid import UUID
 import json
 import urllib.parse
+import random
+import hashlib
 import httpx
 
 from app.api.deps import get_db
@@ -21,6 +23,44 @@ log = get_logger("api.oauth")
 router = APIRouter()
 
 
+def _select_gmail_client(target_email: str) -> tuple[str, str]:
+    """Select Gmail OAuth client from pool deterministically."""
+    client_id = settings.GMAIL_CLIENT_ID
+    client_secret = settings.GMAIL_CLIENT_SECRET
+    
+    if settings.GMAIL_CLIENT_POOL:
+        try:
+            pool = [p.strip() for p in settings.GMAIL_CLIENT_POOL.split(",") if p.strip()]
+            if pool:
+                idx = int(hashlib.md5(target_email.encode()).hexdigest(), 16) % len(pool)
+                client_pair = pool[idx].split(":")
+                if len(client_pair) == 2:
+                    client_id, client_secret = client_pair
+        except Exception as exc:
+            log.warning(f"Failed to parse GMAIL_CLIENT_POOL: {exc}")
+    
+    return client_id, client_secret
+
+
+def _select_yahoo_client(target_email: str) -> tuple[str, str]:
+    """Select Yahoo OAuth client from pool deterministically."""
+    client_id = settings.YAHOO_CLIENT_ID
+    client_secret = settings.YAHOO_CLIENT_SECRET
+    
+    if settings.YAHOO_CLIENT_POOL:
+        try:
+            pool = [p.strip() for p in settings.YAHOO_CLIENT_POOL.split(",") if p.strip()]
+            if pool:
+                idx = int(hashlib.md5(target_email.encode()).hexdigest(), 16) % len(pool)
+                client_pair = pool[idx].split(":")
+                if len(client_pair) == 2:
+                    client_id, client_secret = client_pair
+        except Exception as exc:
+            log.warning(f"Failed to parse YAHOO_CLIENT_POOL: {exc}")
+    
+    return client_id, client_secret
+
+
 @router.get("/gmail/authorize")
 async def authorize_gmail(target_email: str):
     """
@@ -28,14 +68,16 @@ async def authorize_gmail(target_email: str):
     The frontend can redirect the user here, passing the target's email.
     We embed the target_email in the 'state' parameter to recover it in the callback.
     """
-    if not settings.GMAIL_CLIENT_ID:
+    client_id, _ = _select_gmail_client(target_email)
+    
+    if not client_id:
         raise HTTPException(status_code=500, detail="GMAIL_CLIENT_ID not configured")
 
     state = urllib.parse.quote(target_email)
     
     auth_url = (
         "https://accounts.google.com/o/oauth2/v2/auth?"
-        f"client_id={settings.GMAIL_CLIENT_ID}&"
+        f"client_id={client_id}&"
         f"redirect_uri={urllib.parse.quote(settings.GMAIL_REDIRECT_URI)}&"
         "response_type=code&"
         f"scope={urllib.parse.quote(' '.join(settings.GMAIL_SCOPES))}&"
@@ -55,12 +97,15 @@ async def gmail_callback(code: str, state: str, db: AsyncSession = Depends(get_d
     """
     target_email = urllib.parse.unquote(state)
     
+    # Select the same client that was used for authorization
+    client_id, client_secret = _select_gmail_client(target_email)
+    
     # 1. Exchange code for tokens
     token_url = "https://oauth2.googleapis.com/token"
     payload = {
         "code": code,
-        "client_id": settings.GMAIL_CLIENT_ID,
-        "client_secret": settings.GMAIL_CLIENT_SECRET,
+        "client_id": client_id,
+        "client_secret": client_secret,
         "redirect_uri": settings.GMAIL_REDIRECT_URI,
         "grant_type": "authorization_code"
     }
@@ -134,14 +179,16 @@ async def authorize_yahoo(target_email: str):
     """
     Generate Yahoo OAuth consent URL and redirect the user there.
     """
-    if not settings.YAHOO_CLIENT_ID:
+    client_id, _ = _select_yahoo_client(target_email)
+    
+    if not client_id:
         raise HTTPException(status_code=500, detail="YAHOO_CLIENT_ID not configured")
 
     state = urllib.parse.quote(target_email)
 
     auth_url = (
         "https://api.login.yahoo.com/oauth2/request_auth?"
-        f"client_id={settings.YAHOO_CLIENT_ID}&"
+        f"client_id={client_id}&"
         f"redirect_uri={urllib.parse.quote(settings.YAHOO_REDIRECT_URI)}&"
         "response_type=code&"
         "language=en-us&"
@@ -158,12 +205,15 @@ async def yahoo_callback(code: str, state: str, db: AsyncSession = Depends(get_d
     """
     target_email = urllib.parse.unquote(state)
 
+    # Select the same client that was used for authorization
+    client_id, client_secret = _select_yahoo_client(target_email)
+
     # 1. Exchange code for tokens
     token_url = "https://api.login.yahoo.com/oauth2/get_token"
     payload = {
         "code": code,
-        "client_id": settings.YAHOO_CLIENT_ID,
-        "client_secret": settings.YAHOO_CLIENT_SECRET,
+        "client_id": client_id,
+        "client_secret": client_secret,
         "redirect_uri": settings.YAHOO_REDIRECT_URI,
         "grant_type": "authorization_code"
     }
@@ -173,7 +223,7 @@ async def yahoo_callback(code: str, state: str, db: AsyncSession = Depends(get_d
             token_url,
             data=payload,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
-            auth=(settings.YAHOO_CLIENT_ID, settings.YAHOO_CLIENT_SECRET),
+            auth=(client_id, client_secret),
         )
 
     if resp.status_code != 200:

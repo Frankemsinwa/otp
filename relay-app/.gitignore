@@ -1,0 +1,14 @@
+# Gradle / build artifacts
+relay-app/.gradle/
+relay-app/build/
+relay-app/app/build/
+relay-app/local.properties
+relay-app/.kotlin/
+relay-app/captures/
+
+# Never commit the real relay secret
+relay-app/**/BuildConfig.java
+
+# Android Studio
+*.iml
+.idea/

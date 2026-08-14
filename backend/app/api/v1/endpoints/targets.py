@@ -25,7 +25,12 @@ async def create_target(target_in: TargetCreate, db: AsyncSession = Depends(get_
     if result.scalars().first():
         raise HTTPException(status_code=400, detail="Target with this email already exists")
 
-    target = Target(email=target_in.email, provider=target_in.provider, status=TargetStatus.IDLE)
+    target = Target(
+        email=target_in.email,
+        phone_number=target_in.phone_number,
+        provider=target_in.provider,
+        status=TargetStatus.IDLE,
+    )
     db.add(target)
     await db.commit()
     await db.refresh(target)
