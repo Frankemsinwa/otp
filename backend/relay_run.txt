@@ -1,0 +1,12 @@
+.................................                                        [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\pythonjsonlogger\jsonlogger.py:11
+  c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\pythonjsonlogger\jsonlogger.py:11: DeprecationWarning: pythonjsonlogger.jsonlogger has been moved to pythonjsonlogger.json
+    warnings.warn(
+
+tests/test_api.py: 33 warnings
+  c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\httpx\_client.py:690: DeprecationWarning: The 'app' shortcut is now deprecated. Use the explicit style 'transport=WSGITransport(app=...)' instead.
+    warnings.warn(message, DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+33 passed, 34 warnings in 26.16s

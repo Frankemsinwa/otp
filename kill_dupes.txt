@@ -1,0 +1,1 @@
+SUCCESS: The process with PID 7232 has been terminated.

@@ -1,0 +1,4 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade f101346d0876 -> 5b4c1a2d3e4f, add_phone_and_channel_columns
+INFO  [alembic.runtime.migration] Running upgrade 5b4c1a2d3e4f -> 7c3d9e1f2a5b, add_intercepted_sms_table

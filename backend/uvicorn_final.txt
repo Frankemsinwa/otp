@@ -1,0 +1,5 @@
+INFO:     Started server process [9128]
+INFO:     Waiting for application startup.
+{"asctime": "2026-08-29T09:15:15", "name": "otp.api.websocket", "levelname": "INFO", "message": "WebSocket Manager connected to Redis pub/sub"}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
