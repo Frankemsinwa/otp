@@ -1,0 +1,64 @@
+.....F......F..............F..                                           [100%]
+================================== FAILURES ===================================
+_______________________ test_gmail_authenticate_success _______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E659B90A90>
+
+    def test_gmail_authenticate_success(monkeypatch):
+        monkeypatch.setattr(gmail_mod, "build", lambda *a, **k: MagicMock())
+        svc = _gmail_svc()
+>       assert _run(svc.authenticate()) is True
+E       assert False is True
+E        +  where False = _run(<coroutine object GmailService.authenticate at 0x000001E6575FFE40>)
+E        +    where <coroutine object GmailService.authenticate at 0x000001E6575FFE40> = authenticate()
+E        +      where authenticate = <app.services.email.gmail.GmailService object at 0x000001E659D16B10>.authenticate
+
+tests\test_email_connectors.py:161: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    otp.services.gmail:gmail.py:120 Gmail authentication failed
+_________________ test_gmail_fetch_401_refreshes_and_retries __________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E659D88910>
+
+    def test_gmail_fetch_401_refreshes_and_retries(monkeypatch):
+        async def _fake_try_refresh(self):
+            return True
+    
+        monkeypatch.setattr(GmailService, "_try_refresh", _fake_try_refresh)
+        svc = _gmail_svc()
+        raw = _gmail(msg_id="mB")
+        svc._service = _FakeGmailService([_http_error(401), {"messages": [{"id": "mB"}]}], {"mB": raw})
+        msgs = _run(svc.fetch_recent_messages())
+>       assert len(msgs) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests\test_email_connectors.py:222: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    otp.services.gmail:gmail.py:180 Gmail fetch failed
+___________________ test_yahoo_extract_body_plain_multipart ___________________
+
+    def test_yahoo_extract_body_plain_multipart():
+        msg = EmailMessage()
+        msg.set_content("plain text content")
+        msg.add_alternative("<b>html version</b>", subtype="html")
+        svc = YahooService({"username": "v@yahoo.com"})
+>       assert svc._extract_body(msg) == "plain text content"
+E       AssertionError: assert 'plain text content\n' == 'plain text content'
+E         
+E         - plain text content
+E         + plain text content
+E         ?                   +
+
+tests\test_email_connectors.py:430: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\pythonjsonlogger\jsonlogger.py:11
+  c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\pythonjsonlogger\jsonlogger.py:11: DeprecationWarning: pythonjsonlogger.jsonlogger has been moved to pythonjsonlogger.json
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_email_connectors.py::test_gmail_authenticate_success - asse...
+FAILED tests/test_email_connectors.py::test_gmail_fetch_401_refreshes_and_retries
+FAILED tests/test_email_connectors.py::test_yahoo_extract_body_plain_multipart
+3 failed, 27 passed, 1 warning in 4.85s

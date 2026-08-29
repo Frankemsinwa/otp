@@ -1,0 +1,28 @@
+# ============================================================
+# Railway deployment config — OTP Backend
+# Place this in the backend/ directory (same level as Dockerfile).
+# Railway auto-detects this file and the Dockerfile.
+# ============================================================
+
+[build]
+# Build from the Dockerfile in this directory
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Railway sets PORT automatically — start.sh reads it.
+# No restart command needed; Dockerfile CMD handles it.
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[env]
+# Railway injects DATABASE_URL and REDIS_URL automatically
+# when you add Postgres and Redis as service plugins.
+# You set these manually in the Railway dashboard:
+#   ENCRYPTION_KEY  — generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+#   SECRET_KEY      — generate with: python -c "import secrets; print(secrets.token_hex(32))"
+#   RELAY_APP_SECRET — generate with: python -c "import secrets; print(secrets.token_hex(16))"
+#   CORS_ORIGINS    — your Vercel frontend URL, e.g. '["https://your-app.vercel.app"]'
+#   GMAIL_CLIENT_ID / GMAIL_CLIENT_SECRET / GMAIL_REDIRECT_URI
+#   REDIS_URL       — auto-set by Railway Redis plugin
+#   DATABASE_URL    — auto-set by Railway Postgres plugin

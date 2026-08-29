@@ -1,0 +1,60 @@
+INFO:     Started server process [18764]
+INFO:     Waiting for application startup.
+ERROR:    Traceback (most recent call last):
+  File "c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 274, in connect
+    await self.retry.call_with_retry(
+  File "c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\redis\asyncio\retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 681, in _connect
+    reader, writer = await asyncio.open_connection(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\streams.py", line 48, in open_connection
+    transport, _ = await loop.create_connection(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\base_events.py", line 1091, in create_connection
+    raise exceptions[0]
+  File "C:\Users\PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\base_events.py", line 1070, in create_connection
+    sock = await self._connect_sock(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\base_events.py", line 974, in _connect_sock
+    await self.sock_connect(sock, address)
+  File "C:\Users\PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\proactor_events.py", line 726, in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\windows_events.py", line 854, in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\windows_events.py", line 641, in finish_connect
+    ov.getresult()
+ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\starlette\routing.py", line 734, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+  File "C:\Users\PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\Desktop\otp\backend\app\main.py", line 18, in lifespan
+    await ws_manager.connect_redis()
+  File "C:\Users\PC\Desktop\otp\backend\app\api\websocket.py", line 29, in connect_redis
+    await self.pubsub.subscribe(self.channel_name)
+  File "c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\redis\asyncio\client.py", line 1000, in subscribe
+    ret_val = await self.execute_command("SUBSCRIBE", *new_channels.keys())
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\redis\asyncio\client.py", line 849, in execute_command
+    await self.connect()
+  File "c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\redis\asyncio\client.py", line 859, in connect
+    self.connection = await self.connection_pool.get_connection(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 1076, in get_connection
+    await self.ensure_connection(connection)
+  File "c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 1109, in ensure_connection
+    await connection.connect()
+  File "c:\Users\PC\Desktop\otp\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 282, in connect
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 22 connecting to localhost:6379. 22.
+
+ERROR:    Application startup failed. Exiting.

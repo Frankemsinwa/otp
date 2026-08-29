@@ -1,0 +1,6 @@
+INFO:     Started server process [7232]
+INFO:     Waiting for application startup.
+{"asctime": "2026-08-29T01:06:04", "name": "otp.api.websocket", "levelname": "INFO", "message": "WebSocket Manager connected to Redis pub/sub"}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+{"asctime": "2026-08-29T01:48:59", "name": "otp.api.websocket", "levelname": "ERROR", "message": "Redis listener error", "error": "Error while reading from localhost:6379 : (22, 'The specified network name is no longer available', None, 64, None)"}

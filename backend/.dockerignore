@@ -1,7 +1,43 @@
-.git
-.venv
-__pycache__
+# ── Dev / Test ──────────────────────────────
+.venv/
+__pycache__/
+.pytest_cache/
+tests/
 *.pyc
 *.pyo
 *.pyd
-.pytest_cache
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ── Dev artifacts ───────────────────────────
+.env
+.env.*
+*.log
+*.txt
+!requirements.txt
+alembic.ini
+probe*.py
+
+# ── IDE / OS ────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Git ─────────────────────────────────────
+.git/
+.gitignore
+
+# ── Docker (prevent recursive copy) ─────────
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# ── Frontend / relay-app (not needed in backend image) ─
+frontend/
+relay-app/
+docs/
