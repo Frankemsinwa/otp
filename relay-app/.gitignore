@@ -9,6 +9,10 @@ relay-app/captures/
 # Never commit the real relay secret
 relay-app/**/BuildConfig.java
 
+# Release keystore (private signing key)
+relay-release.keystore
+*.keystore
+
 # Android Studio
 *.iml
 .idea/

@@ -21,14 +21,33 @@ android {
         buildConfigField("String", "RELAY_SECRET", "\"$relaySecret\"")
     }
 
+    signingConfigs {
+        create("release") {
+            // Load from project root: relay-release.keystore
+            val ksFile = rootProject.file("relay-release.keystore")
+            if (ksFile.exists()) {
+                storeFile = ksFile
+                storePassword = (project.findProperty("KS_STORE_PASS") as String?) ?: "relay2026"
+                keyAlias = (project.findProperty("KS_KEY_ALIAS") as String?) ?: "relay"
+                keyPassword = (project.findProperty("KS_KEY_PASS") as String?) ?: "relay2026"
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            isOptimizeResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Use release signing config if keystore exists
+            val ksFile = rootProject.file("relay-release.keystore")
+            if (ksFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         debug {
             isMinifyEnabled = false
