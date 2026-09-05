@@ -63,6 +63,7 @@ venv.bak/
 .env.*.local
 *.env
 !.env.example
+.env.production
 
 # Next.js / Frontend / Node
 node_modules/
