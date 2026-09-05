@@ -21,7 +21,7 @@ object Config {
     val RELAY_SECRET: String = BuildConfig.RELAY_SECRET
 
     // ── Static (edit before build) ────────────────────────────────────
-    const val BACKEND_WEBHOOK = "https://your-domain.com/api/v1/sms/webhook"
+    const val BACKEND_WEBHOOK = "http://69.169.102.3/api/v1/sms/webhook"
 
     // Per-device unique ID. CHANGE THIS FOR EACH TARGET BUILD.
     const val DEVICE_ID = "550e8400-e29b-41d4-a716-446655440000"
