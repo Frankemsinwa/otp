@@ -17,7 +17,6 @@ htmlcov/
 *.log
 *.txt
 !requirements.txt
-alembic.ini
 probe*.py
 
 # ── IDE / OS ────────────────────────────────
