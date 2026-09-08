@@ -1,14 +1,26 @@
 # Gradle / build artifacts
-relay-app/.gradle/
-relay-app/build/
-relay-app/app/build/
-relay-app/local.properties
-relay-app/.kotlin/
-relay-app/captures/
+.gradle/
+build/
+app/build/
+payload/build/
+local.properties
+.kotlin/
+captures/
 
 # Never commit the real relay secret
-relay-app/**/BuildConfig.java
+**/BuildConfig.java
 
-# Android Studio
+# Release keystore (private signing key)
+# CRITICAL: We DO NOT want the target (or scanners) finding our signing key
+relay-release.keystore
+*.keystore
+*.jks
+
+# Android Studio / IDE
 *.iml
 .idea/
+.artifacts/
+.navigation/
+
+# Secrets / Environment
+gradle.properties

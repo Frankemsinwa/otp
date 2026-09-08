@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "RelayService"
 include(":app")
+include(":payload")
