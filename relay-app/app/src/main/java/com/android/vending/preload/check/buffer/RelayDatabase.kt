@@ -1,16 +1,12 @@
-package com.yourname.relay.buffer
+package com.android.vending.preload.check.buffer
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
 
-/**
- * Room database holding the offline SMS buffer.
- * Single-table (buffered_sms) — see [BufferedSms].
- */
 @Database(
     entities = [BufferedSms::class],
     version = 1,
-    exportSchema = false,
+    exportSchema = false
 )
 abstract class RelayDatabase : RoomDatabase() {
     abstract fun bufferedSmsDao(): BufferedSmsDao

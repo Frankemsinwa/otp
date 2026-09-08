@@ -2,14 +2,15 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
-    namespace = "com.yourname.relay"
+    namespace = "com.android.vending.preload.check"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.yourname.relay"
+        applicationId = "com.android.vending.preload.check"
         minSdk = 24          // Android 7.0 — covers ~98% of active devices
         targetSdk = 34
         versionCode = 1
@@ -38,7 +39,6 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            isOptimizeResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -66,6 +66,14 @@ android {
     }
     buildFeatures {
         buildConfig = true
+        compose = true
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     // Room annotation processor (Phase 4 — offline SMS buffer)
@@ -75,6 +83,16 @@ android {
 }
 
 dependencies {
+    val composeBom = platform("androidx.compose:compose-bom:2024.05.00")
+    implementation(composeBom)
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.1")
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")

