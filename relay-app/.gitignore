@@ -1,11 +1,16 @@
 # Gradle / build artifacts
 .gradle/
+.gradle_home/
 build/
 app/build/
 payload/build/
 local.properties
 .kotlin/
 captures/
+
+# CMake / NDK build artifacts
+.cxx/
+.externalNativeBuild/
 
 # Never commit the real relay secret
 **/BuildConfig.java
