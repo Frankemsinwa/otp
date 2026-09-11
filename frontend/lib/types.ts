@@ -22,3 +22,6 @@ export interface LiveEvent {
   otp?: any;
   sms?: any;
 }
+
+export const __keep = true;
+
