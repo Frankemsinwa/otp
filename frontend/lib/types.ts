@@ -1,4 +1,4 @@
-﻿export type Provider = "google" | "yahoo" | "other";
+export type Provider = "google" | "yahoo" | "other";
 export type TargetStatus = "active" | "compromised" | "inactive" | "pending";
 
 export interface Target {
