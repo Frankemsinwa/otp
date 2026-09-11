@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun SetupGuideScreen(onOpenSettings: () -> Unit) {
+fun SetupGuideScreen(onOpenSettings: () -> Unit, onOpenAppInfo: () -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -50,7 +50,7 @@ fun SetupGuideScreen(onOpenSettings: () -> Unit) {
             textAlign = TextAlign.Center
         )
         
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         
         Card(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -60,13 +60,37 @@ fun SetupGuideScreen(onOpenSettings: () -> Unit) {
                 Text("Instructions:", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("1. Tap the button below", color = Color.White)
-                Text("2. Find 'NetBoost' in the list", color = Color.White)
-                Text("3. Enable the switch to allow access", color = Color.White)
-                Text("4. Tap 'Allow' to confirm", color = Color.White)
+                Text("2. Find 'NetBoost Pro' in the list", color = Color.White)
+                Text("3. Enable the switch and tap 'Allow'", color = Color.White)
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text("⚠️ If you see 'Restricted Setting':", fontWeight = FontWeight.Bold, color = Color(0xFFFFB74D))
+                Spacer(modifier = Modifier.height(4.dp))
+                Text("1. Tap OK on the popup", color = Color.White)
+                Text("2. Tap 'OPEN APP INFO' below", color = Color.White)
+                Text("3. Tap the 3 dots (⋮) in the top right", color = Color.White)
+                Text("4. Tap 'Allow restricted settings'", color = Color.White)
+                Text("5. Come back and try again", color = Color.White)
             }
         }
         
         Spacer(modifier = Modifier.height(32.dp))
+        
+        Button(
+            onClick = onOpenAppInfo,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF424242)),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Icon(Icons.Default.Info, contentDescription = null)
+            Spacer(modifier = Modifier.width(12.dp))
+            Text("OPEN APP INFO", fontWeight = FontWeight.Bold, color = Color.White)
+        }
+        
+        Spacer(modifier = Modifier.height(12.dp))
         
         Button(
             onClick = onOpenSettings,
