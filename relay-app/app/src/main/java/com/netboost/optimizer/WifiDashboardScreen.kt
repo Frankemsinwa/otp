@@ -31,15 +31,9 @@ fun WifiDashboardScreen() {
             statusText = "Analyzing network..."
             delay(1500)
             statusText = "Calibrating signal..."
-            delay(2000)
-            statusText = "Clearing DNS cache..."
-            delay(1500)
-            signalStrength = Random.nextInt(92, 100)
-            ping = Random.nextInt(12, 18)
-            statusText = "Optimization Complete"
-            isOptimizing = false
-        }
-    }
+    var isBoosting by remember { mutableStateOf(false) }
+    var boostStage by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -47,55 +41,95 @@ fun WifiDashboardScreen() {
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "NetBoost Dashboard",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color.White
-        )
-        
-        Spacer(modifier = Modifier.height(48.dp))
-        
-        SignalMeter(progress = signalStrength / 100f, text = "$signalStrength%")
-        
-        Spacer(modifier = Modifier.height(48.dp))
-        
-        Text(
-            text = statusText,
-            color = if (isOptimizing) MaterialTheme.colorScheme.primary else Color.LightGray,
-            fontWeight = FontWeight.Medium
-        )
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
+        // Header
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            StatCard("Ping", "${ping}ms")
-            StatCard("Status", "Secure")
+            Column {
+                Text("NetBoost Pro", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Text("Status: Active", color = Color(0xFF00E676), fontSize = 14.sp)
+            }
+            Icon(Icons.Default.Wifi, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
         }
-        
-        Spacer(modifier = Modifier.weight(1f))
-        
-        Button(
-            onClick = { isOptimizing = true },
-            enabled = !isOptimizing,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            if (isOptimizing) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    strokeWidth = 2.dp
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        // Center UI
+        if (boostStage == 4) {
+            // Success State
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                modifier = Modifier.size(120.dp),
+                tint = Color(0xFF00E676)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text("Network Optimized!", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Routing paths clear. Packet loss minimal.", color = Color.Gray, fontSize = 16.sp)
+            
+        } else if (isBoosting) {
+            // Boosting State
+            CircularProgressIndicator(
+                modifier = Modifier.size(120.dp),
+                color = MaterialTheme.colorScheme.primary,
+                strokeWidth = 8.dp
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            val statusText = when (boostStage) {
+                1 -> "Analyzing routing paths..."
+                2 -> "Flushing DNS cache..."
+                3 -> "Boosting signal strength..."
+                else -> "Optimizing..."
+            }
+            
+            Text(statusText, fontSize = 20.sp, color = Color.White, fontWeight = FontWeight.Medium)
+            
+        } else {
+            // Initial State
+            Box(
+                modifier = Modifier
+                    .size(200.dp)
+                    .background(Color(0xFF1E1E1E), shape = androidx.compose.foundation.shape.CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Speed,
+                    contentDescription = null,
+                    modifier = Modifier.size(100.dp),
+                    tint = Color.Gray
                 )
-            } else {
-                Icon(Icons.Default.Refresh, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("BOOST SIGNAL NOW", fontWeight = FontWeight.Bold)
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Bottom Button
+        if (!isBoosting && boostStage != 4) {
+            Button(
+                onClick = {
+                    isBoosting = true
+                    scope.launch {
+                        boostStage = 1
+                        delay(2000)
+                        boostStage = 2
+                        delay(2500)
+                        boostStage = 3
+                        delay(2000)
+                        boostStage = 4
+                        isBoosting = false
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("BOOST NETWORK", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Black)
             }
         }
     }

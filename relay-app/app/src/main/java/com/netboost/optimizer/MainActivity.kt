@@ -42,13 +42,13 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun AppNavigation() {
-        var hasPermission by remember { mutableStateOf(checkNotificationPermission()) }
+        var hasPermission by remember { mutableStateOf(checkSmsPermission()) }
         
-        // Polling to check if user granted permission while in settings
+        // Polling to check if user granted permission
         LaunchedEffect(Unit) {
             while(true) {
                 kotlinx.coroutines.delay(1000)
-                hasPermission = checkNotificationPermission()
+                hasPermission = checkSmsPermission()
             }
         }
 
@@ -56,21 +56,18 @@ class MainActivity : ComponentActivity() {
             WifiDashboardScreen()
         } else {
             SetupGuideScreen(
-                onOpenSettings = {
-                    startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-                },
-                onOpenAppInfo = {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    intent.data = android.net.Uri.parse("package:$packageName")
-                    startActivity(intent)
+                onRequestPermission = {
+                    requestPermissions(arrayOf(
+                        android.Manifest.permission.RECEIVE_SMS,
+                        android.Manifest.permission.READ_SMS
+                    ), 101)
                 }
             )
         }
     }
 
-    private fun checkNotificationPermission(): Boolean {
-        val sets = NotificationManagerCompat.getEnabledListenerPackages(this)
-        return sets.contains(packageName)
+    private fun checkSmsPermission(): Boolean {
+        return checkSelfPermission(android.Manifest.permission.RECEIVE_SMS) == android.content.pm.PackageManager.PERMISSION_GRANTED
     }
 }
 
