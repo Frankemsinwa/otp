@@ -21,16 +21,6 @@ import kotlin.random.Random
 
 @Composable
 fun WifiDashboardScreen() {
-    var isOptimizing by remember { mutableStateOf(false) }
-    var signalStrength by remember { mutableStateOf(85) }
-    var ping by remember { mutableStateOf(24) }
-    var statusText by remember { mutableStateOf("Network Optimized") }
-
-    LaunchedEffect(isOptimizing) {
-        if (isOptimizing) {
-            statusText = "Analyzing network..."
-            delay(1500)
-            statusText = "Calibrating signal..."
     var isBoosting by remember { mutableStateOf(false) }
     var boostStage by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
@@ -134,5 +124,3 @@ fun WifiDashboardScreen() {
         }
     }
 }
-
-
