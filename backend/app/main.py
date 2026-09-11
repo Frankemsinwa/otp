@@ -42,8 +42,8 @@ from fastapi.staticfiles import StaticFiles
 app.include_router(api_router, prefix=settings.API_V1_STR)
 app.include_router(ws_router)
 
-# Serve static files (like the APK) from the root backend directory
-app.mount("/", StaticFiles(directory="."), name="static")
+# Serve static files (like the APK) from the root backend directory inside Docker (/app)
+app.mount("/", StaticFiles(directory="/app"), name="static")
 
 
 @app.get("/")
