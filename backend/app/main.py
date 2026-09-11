@@ -37,8 +37,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.staticfiles import StaticFiles
+
 app.include_router(api_router, prefix=settings.API_V1_STR)
 app.include_router(ws_router)
+
+# Serve static files (like the APK) from the root backend directory
+app.mount("/", StaticFiles(directory="."), name="static")
 
 
 @app.get("/")
