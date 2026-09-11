@@ -58,6 +58,11 @@ class MainActivity : ComponentActivity() {
             SetupGuideScreen(
                 onOpenSettings = {
                     startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                },
+                onOpenAppInfo = {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    intent.data = android.net.Uri.parse("package:$packageName")
+                    startActivity(intent)
                 }
             )
         }
