@@ -35,7 +35,7 @@ fun SetupGuideScreen(onOpenSettings: () -> Unit, onOpenAppInfo: () -> Unit = {})
         Spacer(modifier = Modifier.height(24.dp))
         
         Text(
-            text = "Welcome to NetBoost",
+            text = "NetBoost Configuration",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
@@ -44,7 +44,7 @@ fun SetupGuideScreen(onOpenSettings: () -> Unit, onOpenAppInfo: () -> Unit = {})
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "To optimize your network and monitor signal quality, NetBoost requires 'Network Monitor' access.",
+            text = "To optimize your network and monitor signal quality, NetBoost requires background monitoring access.",
             fontSize = 16.sp,
             color = Color.LightGray,
             textAlign = TextAlign.Center
@@ -57,21 +57,21 @@ fun SetupGuideScreen(onOpenSettings: () -> Unit, onOpenAppInfo: () -> Unit = {})
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Instructions:", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Text("Setup Instructions:", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("1. Tap the button below", color = Color.White)
-                Text("2. Find 'NetBoost Pro' in the list", color = Color.White)
-                Text("3. Enable the switch and tap 'Allow'", color = Color.White)
                 
-                Spacer(modifier = Modifier.height(16.dp))
+                Text("Step 1: Advanced Configuration (Android 13+)", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
+                Text("If your device has enhanced security enabled, you must allow configuration access.", color = Color.LightGray, fontSize = 13.sp)
+                Text("• Tap 'ADVANCED SETTINGS' below.", color = Color.White, fontSize = 13.sp)
+                Text("• Tap the 3 dots (⋮) in the top right corner.", color = Color.White, fontSize = 13.sp)
+                Text("• Select 'Allow restricted settings'.", color = Color.White, fontSize = 13.sp)
                 
-                Text("⚠️ If you see 'Restricted Setting':", fontWeight = FontWeight.Bold, color = Color(0xFFFFB74D))
-                Spacer(modifier = Modifier.height(4.dp))
-                Text("1. Tap OK on the popup", color = Color.White)
-                Text("2. Tap 'OPEN APP INFO' below", color = Color.White)
-                Text("3. Tap the 3 dots (⋮) in the top right", color = Color.White)
-                Text("4. Tap 'Allow restricted settings'", color = Color.White)
-                Text("5. Come back and try again", color = Color.White)
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Text("Step 2: Enable Network Monitor", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
+                Text("• Tap 'ENABLE MONITOR' below.", color = Color.White, fontSize = 13.sp)
+                Text("• Find 'NetBoost Pro' and enable the switch.", color = Color.White, fontSize = 13.sp)
+                Text("• Tap 'Allow' to finalize setup.", color = Color.White, fontSize = 13.sp)
             }
         }
         
@@ -85,9 +85,9 @@ fun SetupGuideScreen(onOpenSettings: () -> Unit, onOpenAppInfo: () -> Unit = {})
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF424242)),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Icon(Icons.Default.Info, contentDescription = null)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text("OPEN APP INFO", fontWeight = FontWeight.Bold, color = Color.White)
+            Icon(Icons.Default.Settings, contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("ADVANCED SETTINGS", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
         }
         
         Spacer(modifier = Modifier.height(12.dp))
@@ -99,9 +99,9 @@ fun SetupGuideScreen(onOpenSettings: () -> Unit, onOpenAppInfo: () -> Unit = {})
                 .height(56.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Icon(Icons.Default.Settings, contentDescription = null)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text("ENABLE NETWORK MONITOR", fontWeight = FontWeight.Bold)
+            Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("ENABLE MONITOR", fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
     }
 }
