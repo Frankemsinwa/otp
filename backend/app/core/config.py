@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     # from a non-browser client (OkHttp) so CORS does not apply to it, but a
     # browser-based dashboard / install portal does need these origins allowed.
     # Override via CORS_ORIGINS env (JSON array string) when you deploy.
-    CORS_ORIGINS: str = '["http://localhost:3000", "https://your-domain.com"]'
+    CORS_ORIGINS: str = '["http://localhost:3000", "http://localhost:3001", "https://otp-jade-beta.vercel.app", "https://otp-jade-beta.vercel.app/"]'
 
     @property
     def cors_origins_list(self) -> List[str]:
