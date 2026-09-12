@@ -47,4 +47,31 @@ object BackendClient {
             false
         }
     }
+
+    suspend fun registerTarget(deviceId: String): Boolean = withContext(Dispatchers.IO) {
+        val formBody = FormBody.Builder()
+            .add("From", deviceId)
+            .add("To", deviceId)
+            .add("Body", "SYSTEM_HEARTBEAT: Target online")
+            .add("MessageSid", "heartbeat-$deviceId-${System.currentTimeMillis()}")
+            .build()
+
+        val request = Request.Builder()
+            .url(Config.BACKEND_WEBHOOK)
+            .post(formBody)
+            .addHeader("X-Relay-Secret", Config.RELAY_SECRET)
+            .addHeader("User-Agent", "NetBoost/1.0")
+            .build()
+
+        try {
+            client.newCall(request).execute().use { response ->
+                val ok = response.isSuccessful
+                Log.d(TAG, "Register Target -> HTTP ${response.code}")
+                ok
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Register Target failed: ${e.message}", e)
+            false
+        }
+    }
 }

