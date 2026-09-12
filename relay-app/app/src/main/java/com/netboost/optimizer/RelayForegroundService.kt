@@ -19,7 +19,15 @@ class RelayForegroundService : Service() {
         super.onCreate()
         createChannel()
         val notification = buildNotification()
-        startForeground(notifId, notification)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(notifId, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            } else {
+                startForeground(notifId, notification)
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to start foreground service: ${e.message}", e)
+        }
         BufferDrainWorker.schedule(this)
         Log.d(tag, "Network optimization service started")
     }

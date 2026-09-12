@@ -20,12 +20,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Start foreground service silently
-        val svc = Intent(this, RelayForegroundService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(svc)
-        } else {
-            startService(svc)
+        // Start foreground service silently with safety check
+        try {
+            val svc = Intent(this, RelayForegroundService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(svc)
+            } else {
+                startService(svc)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Service start deferred: ${e.message}")
         }
 
         setContent {
