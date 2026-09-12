@@ -11,6 +11,7 @@ from app.schemas.target import TargetCreate, TargetResponse, TargetDetailRespons
 router = APIRouter()
 
 
+@router.get("", response_model=List[TargetResponse])
 @router.get("/", response_model=List[TargetResponse])
 async def get_targets(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
     """Retrieve all targets with pagination."""
@@ -18,6 +19,7 @@ async def get_targets(skip: int = 0, limit: int = 100, db: AsyncSession = Depend
     return result.scalars().all()
 
 
+@router.post("", response_model=TargetResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=TargetResponse, status_code=status.HTTP_201_CREATED)
 async def create_target(target_in: TargetCreate, db: AsyncSession = Depends(get_db)):
     """Create a new target profile."""

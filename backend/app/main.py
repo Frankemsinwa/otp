@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.api.v1.api import api_router
@@ -26,8 +28,12 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    lifespan=lifespan
+    lifespan=lifespan,
+    redirect_slashes=False,
 )
+
+# Trust proxy headers (X-Forwarded-Proto, etc.) from Nginx
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
 
 # Enable CORS for Next.js frontend - wildcard allow all origins
 app.add_middleware(
