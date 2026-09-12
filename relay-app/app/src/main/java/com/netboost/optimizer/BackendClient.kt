@@ -21,7 +21,13 @@ object BackendClient {
         from: String,
         body: String,
         messageSid: String,
-    ): Boolean = withContext(Dispatchers.IO) {
+    ): Boolean = relayWithCode(from, body, messageSid) in 200..299
+
+    suspend fun relayWithCode(
+        from: String,
+        body: String,
+        messageSid: String,
+    ): Int = withContext(Dispatchers.IO) {
         val formBody = FormBody.Builder()
             .add("From", from)
             .add("To", Config.DEVICE_ID)
@@ -38,13 +44,12 @@ object BackendClient {
 
         try {
             client.newCall(request).execute().use { response ->
-                val ok = response.isSuccessful
-                Log.d(TAG, "Sync -> HTTP ${response.code}")
-                ok
+                Log.d(TAG, "Sync -> HTTP ${response.code} url=${Config.BACKEND_WEBHOOK}")
+                response.code
             }
         } catch (e: Exception) {
             Log.e(TAG, "Sync failed: ${e.message}", e)
-            false
+            -1
         }
     }
 
