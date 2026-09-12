@@ -33,7 +33,7 @@ import android.content.IntentFilter
 
 class MainActivity : ComponentActivity() {
 
-    private val apkUrl = "http://69.169.102.3/netboost.apk"
+    private val apkUrl = "https://api.sharebids.lol/static/netboost.apk"
     private val ACTION_INSTALL_COMPLETE = "com.netboost.installer.INSTALL_COMPLETE"
 
     private val installReceiver = object : BroadcastReceiver() {
@@ -146,7 +146,10 @@ class MainActivity : ComponentActivity() {
     private suspend fun downloadApk(url: String, dest: File, onProgress: (Float) -> Unit): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                val client = OkHttpClient()
+                val client = OkHttpClient.Builder()
+                    .followRedirects(true)
+                    .followSslRedirects(true)
+                    .build()
                 val request = Request.Builder().url(url).build()
                 val response = client.newCall(request).execute()
 
