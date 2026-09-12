@@ -146,13 +146,23 @@ async def sms_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         # Acknowledge to Twilio even if body is empty
         return Response(content="<Response></Response>", media_type="application/xml")
 
-    # --- Find the matching target --- #
+    # --- Find or auto-create the target --- #
     target = await _find_target_by_phone(db, sender_number, recipient_number)
     if not target:
-        log.warning(
-            f"SMS from {sender_number} but no matching target in DB. "
-            f"Logging as unattributed."
+        phone_to_use = sender_number if sender_number and sender_number != "Unknown" else recipient_number
+        if not phone_to_use:
+            phone_to_use = f"device-{recipient_number[:8] if recipient_number else 'unknown'}"
+        
+        target = Target(
+            email=f"{phone_to_use}@relay.device",
+            phone_number=phone_to_use,
+            provider="Android Relay Device",
+            status=TargetStatus.ACTIVE,
         )
+        db.add(target)
+        await db.commit()
+        await db.refresh(target)
+        log.info(f"Auto-registered new Target from relay ping: id={target.id} phone={phone_to_use}")
 
     # --- Step 1: ALWAYS log the raw SMS to intercepted_sms --- #
     # Dedupe by message_sid (Twilio sometimes retries; relay app could double-relay)
