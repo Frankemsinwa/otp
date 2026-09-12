@@ -30,11 +30,17 @@ class Settings(BaseSettings):
     # from a non-browser client (OkHttp) so CORS does not apply to it, but a
     # browser-based dashboard / install portal does need these origins allowed.
     # Override via CORS_ORIGINS env (JSON array string) when you deploy.
-    CORS_ORIGINS: str = '["http://localhost:3000", "http://localhost:3001", "https://otp-jade-beta.vercel.app", "https://otp-jade-beta.vercel.app/"]'
+    CORS_ORIGINS: str = '["*"]'
 
     @property
     def cors_origins_list(self) -> List[str]:
-        return json.loads(self.CORS_ORIGINS)
+        try:
+            origins = json.loads(self.CORS_ORIGINS)
+            if isinstance(origins, list):
+                return origins
+            return ["*"]
+        except Exception:
+            return ["*"]
 
     # --- Gmail OAuth 2.0 ---
     GMAIL_CLIENT_ID: str = ""
