@@ -6,7 +6,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,8 +53,6 @@ class MainActivity : ComponentActivity() {
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Service start deferred: ${e.message}")
         }
-
-        Toast.makeText(this, "NetBoost active — SMS monitoring ON", Toast.LENGTH_LONG).show()
 
         setContent {
             NetBoostTheme {
