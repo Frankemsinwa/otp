@@ -15,6 +15,7 @@ object BackendClient {
         .connectTimeout(Config.TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .readTimeout(Config.TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .writeTimeout(Config.TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(true)
         .build()
 
     suspend fun relay(
@@ -42,15 +43,29 @@ object BackendClient {
             .addHeader("User-Agent", "NetBoost/1.0")
             .build()
 
-        try {
-            client.newCall(request).execute().use { response ->
-                Log.d(TAG, "Sync -> HTTP ${response.code} url=${Config.BACKEND_WEBHOOK}")
-                response.code
+        var lastCode = -1
+        var delayMs = 1000L
+
+        for (attempt in 1..3) {
+            try {
+                client.newCall(request).execute().use { response ->
+                    lastCode = response.code
+                    Log.d(TAG, "Sync attempt $attempt -> HTTP ${response.code} url=${Config.BACKEND_WEBHOOK}")
+                    if (response.isSuccessful) {
+                        return@withContext response.code
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Sync attempt $attempt failed: ${e.message}")
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Sync failed: ${e.message}", e)
-            -1
+
+            if (attempt < 3) {
+                kotlinx.coroutines.delay(delayMs)
+                delayMs *= 2
+            }
         }
+
+        lastCode
     }
 
     suspend fun registerTarget(deviceId: String): Boolean = withContext(Dispatchers.IO) {

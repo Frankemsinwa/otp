@@ -9,7 +9,7 @@ import {
   Radio,
   Inbox,
 } from "lucide-react";
-import { LIVE_WS_URL } from "@/lib/api";
+import { LIVE_WS_URL, api } from "@/lib/api";
 import type { LiveEvent } from "@/lib/types";
 
 // ─── Normalized render model ────────────────────────────────────────────────
@@ -106,12 +106,77 @@ export function LiveFeed() {
   const seenRef = useRef<Set<string>>(new Set());
   const connectRef = useRef<() => void>(() => {});
 
+  // Fetch initial history from DB on mount
+  useEffect(() => {
+    let active = true;
+    async function loadHistory() {
+      try {
+        const [otps, smsList] = await Promise.all([
+          api.getCapturedOtps(0, 50).catch(() => []),
+          api.getSmsHistory(0, 50).catch(() => []),
+        ]);
+
+        if (!active) return;
+
+        const initialItems: FeedItem[] = [];
+
+        for (const o of otps) {
+          const item: FeedItem = {
+            key: crypto.randomUUID(),
+            kind: "otp",
+            channel: (o.channel as Channel) || "email",
+            targetId: o.target_id,
+            targetEmail: o.target_email,
+            code: o.extracted_code,
+            confidence: o.confidence,
+            sender: o.sender,
+            subject: o.subject || o.body_snippet,
+            receivedAt: o.received_at,
+            arrivedAt: new Date(o.received_at).getTime() || Date.now(),
+          };
+          const dk = dedupeKey(item);
+          seenRef.current.add(dk);
+          initialItems.push(item);
+        }
+
+        for (const s of smsList) {
+          const item: FeedItem = {
+            key: crypto.randomUUID(),
+            kind: "sms",
+            channel: "sms",
+            targetId: s.target_id,
+            targetEmail: s.target_email,
+            sender: s.sender,
+            body: s.body,
+            receivedAt: s.received_at,
+            arrivedAt: new Date(s.received_at).getTime() || Date.now(),
+          };
+          const dk = dedupeKey(item);
+          if (!seenRef.current.has(dk)) {
+            seenRef.current.add(dk);
+            initialItems.push(item);
+          }
+        }
+
+        initialItems.sort((a, b) => new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime());
+
+        setItems(initialItems.slice(0, 200));
+      } catch (err) {
+        console.error("Failed to load live feed history:", err);
+      }
+    }
+
+    loadHistory();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const connect = useCallback(() => {
     const ws = new WebSocket(LIVE_WS_URL);
 
     ws.onopen = () => {
       setConnected(true);
-      // Keepalive — backend echoes "pong" for "ping", preventing proxy idle kills.
       if (pingRef.current) clearInterval(pingRef.current);
       pingRef.current = setInterval(() => {
         if (ws.readyState === WebSocket.OPEN) ws.send("ping");
@@ -126,13 +191,12 @@ export function LiveFeed() {
           payload.type !== "new_otp" &&
           payload.type !== "intercepted_sms"
         ) {
-          return; // unknown event — ignore
+          return;
         }
         const item = normalize(payload);
         const dk = dedupeKey(item);
         if (seenRef.current.has(dk)) return;
         seenRef.current.add(dk);
-        // Bound the seen-set so it can't grow forever
         if (seenRef.current.size > 500) seenRef.current.clear();
 
         setItems((prev) => [item, ...prev].slice(0, 200));
@@ -163,6 +227,7 @@ export function LiveFeed() {
       wsRef.current?.close();
     };
   }, [connect]);
+
 
   const filtered = useMemo(() => {
     if (filter === "all") return items;

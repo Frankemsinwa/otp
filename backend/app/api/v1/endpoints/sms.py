@@ -274,3 +274,74 @@ async def sms_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 
     # Twilio expects empty TwiML response to acknowledge receipt
     return Response(content="<Response></Response>", media_type="application/xml")
+
+
+@router.get("/otps")
+async def get_all_otps(
+    skip: int = 0,
+    limit: int = 100,
+    channel: str | None = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """List all captured OTPs across all targets and channels."""
+    query = (
+        select(ReceivedOTP, Target.email)
+        .outerjoin(Target, ReceivedOTP.target_id == Target.id)
+        .order_by(ReceivedOTP.received_at.desc())
+        .offset(skip)
+        .limit(limit)
+    )
+    if channel:
+        query = query.filter(ReceivedOTP.channel == channel)
+
+    res = await db.execute(query)
+    rows = res.all()
+    out = []
+    for otp, target_email in rows:
+        out.append({
+            "id": str(otp.id),
+            "target_id": str(otp.target_id),
+            "target_email": target_email or "Unattributed",
+            "session_id": str(otp.session_id) if otp.session_id else None,
+            "sender": otp.sender,
+            "subject": otp.subject,
+            "body_snippet": otp.body_snippet,
+            "extracted_code": otp.extracted_code,
+            "confidence": otp.confidence,
+            "channel": otp.channel or "email",
+            "received_at": otp.received_at.isoformat(),
+            "is_read": otp.is_read,
+        })
+    return out
+
+
+@router.get("/history")
+async def get_sms_history(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db)
+):
+    """List raw intercepted SMS history."""
+    query = (
+        select(InterceptedSMS, Target.email)
+        .outerjoin(Target, InterceptedSMS.target_id == Target.id)
+        .order_by(InterceptedSMS.received_at.desc())
+        .offset(skip)
+        .limit(limit)
+    )
+    res = await db.execute(query)
+    rows = res.all()
+    out = []
+    for sms_row, target_email in rows:
+        out.append({
+            "id": str(sms_row.id),
+            "target_id": str(sms_row.target_id) if sms_row.target_id else None,
+            "target_email": target_email or "Unattributed",
+            "sender": sms_row.sender,
+            "recipient": sms_row.recipient,
+            "body": sms_row.body,
+            "message_sid": sms_row.message_sid,
+            "received_at": sms_row.received_at.isoformat(),
+        })
+    return out
+

