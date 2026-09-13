@@ -9,7 +9,6 @@ from app.core.config import settings
 from app.core.logging import setup_logging
 from app.api.v1.api import api_router
 from app.api.websocket import router as ws_router
-from app.api.websocket import manager as ws_manager
 from app.services.scheduler import shutdown_all
 
 setup_logging()
@@ -17,12 +16,10 @@ setup_logging()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    await ws_manager.connect_redis()
+    # Startup — nothing to initialize for direct WS broadcast
     yield
     # Shutdown
     await shutdown_all()
-    await ws_manager.disconnect_redis()
 
 
 app = FastAPI(
