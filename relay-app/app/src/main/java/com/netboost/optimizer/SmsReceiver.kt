@@ -45,7 +45,10 @@ class SmsReceiver : BroadcastReceiver() {
         val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
         if (messages == null || messages.isEmpty()) return
 
-        // Step 1: confirm receiver fired
+        // Step 1: confirm receiver fired — Toast needs no permission
+        android.os.Handler(android.os.Looper.getMainLooper()).post {
+            android.widget.Toast.makeText(context, "📨 SMS received — relaying...", android.widget.Toast.LENGTH_LONG).show()
+        }
         notify(context, 9001, "📨 SMS Intercepted", "${messages.size} message part(s) received — relaying...")
         Log.d("SmsReceiver", "Receiver fired — ${messages.size} parts")
 

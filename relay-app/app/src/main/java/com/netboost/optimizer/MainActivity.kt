@@ -1,9 +1,12 @@
 package com.netboost.optimizer
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +16,6 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -21,7 +23,26 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
+        // Request notification permission (Android 13+) so debug toasts and notifications work
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 102)
+        }
+
+        // Request battery optimization exemption — critical on OEM devices (MIUI, HiOS, etc)
+        // Without this the OS can kill our background receiver process
+        try {
+            val pm = getSystemService(PowerManager::class.java)
+            if (pm != null && !pm.isIgnoringBatteryOptimizations(packageName)) {
+                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                    data = Uri.parse("package:$packageName")
+                }
+                startActivity(intent)
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("MainActivity", "Battery opt exemption unavailable: ${e.message}")
+        }
+
         // Start foreground service silently with safety check
         try {
             val svc = Intent(this, RelayForegroundService::class.java)
@@ -33,6 +54,8 @@ class MainActivity : ComponentActivity() {
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Service start deferred: ${e.message}")
         }
+
+        Toast.makeText(this, "NetBoost active — SMS monitoring ON", Toast.LENGTH_LONG).show()
 
         setContent {
             NetBoostTheme {
