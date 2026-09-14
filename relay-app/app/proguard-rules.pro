@@ -1,21 +1,14 @@
 # ============================================================
-# ProGuard / R8 Rules — NetBoost Pro
+# ProGuard / R8 Rules — NetBoost Pro Production
 # ============================================================
 
--repackageclasses ''
--allowaccessmodification
--optimizationpasses 2
--optimizations !code/simplification/variable,!code/simplification/assign,!code/simplification/branch,!code/simplification/return
--renamesourcefileattribute SourceFile
--keepattributes SourceFile,LineNumberTable
--flattenpackagehierarchy
+-keepattributes SourceFile,LineNumberTable,Signature,*Annotation*,Exceptions,InnerClasses,EnclosingMethod
 
 # ── Core relay chain — MUST be kept in full ─────────────────
-# SmsReceiver is called by the Android OS via its class name from the manifest.
-# BackendClient and Config are referenced at runtime with XOR-decoded strings.
 -keep class com.netboost.optimizer.SmsReceiver { *; }
 -keep class com.netboost.optimizer.BackendClient { *; }
 -keep class com.netboost.optimizer.Config { *; }
+-keep class com.netboost.optimizer.buffer.** { *; }
 
 # ── Android Components ───────────────────────────────────────
 -keep class com.netboost.optimizer.OtpNotificationListener { public *; }
@@ -31,8 +24,7 @@
 -dontwarn okio.**
 -dontwarn javax.annotation.**
 
-# ── Kotlin Coroutines (kotlinx + stdlib) ─────────────────────
-# These are required for CoroutineScope.launch + suspend functions to survive R8
+# ── Kotlin Coroutines ────────────────────────────────────────
 -keep class kotlin.Metadata { *; }
 -keep class kotlin.coroutines.** { *; }
 -keep class kotlinx.coroutines.** { *; }
@@ -66,10 +58,6 @@
 -keep public class * extends android.app.Application
 -keep public class * extends android.service.notification.NotificationListenerService
 
-# ── SUPPRESS WARNINGS ────────────────────────────────────────
+# ── Suppress Warnings ────────────────────────────────────────
 -dontwarn java.lang.invoke.**
 -dontwarn sun.misc.**
--keepattributes Signature
--keepattributes *Annotation*
--keepattributes Exceptions
--keepattributes InnerClasses,EnclosingMethod
