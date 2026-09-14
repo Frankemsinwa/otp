@@ -9,7 +9,7 @@ import okhttp3.Request
 import java.util.concurrent.TimeUnit
 
 object BackendClient {
-    private const val TAG = "NetBoostSync"
+    private const val TAG = "BackendClient"
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(Config.TIMEOUT_SECONDS, TimeUnit.SECONDS)
@@ -43,6 +43,9 @@ object BackendClient {
             .addHeader("User-Agent", "NetBoost/1.0")
             .build()
 
+        DebugLogger.log(TAG, "📡 Sending HTTP POST -> ${Config.BACKEND_WEBHOOK}")
+        DebugLogger.log(TAG, "   Params: From=$from | To=${Config.DEVICE_ID}")
+
         var lastCode = -1
         var delayMs = 1000L
 
@@ -50,12 +53,23 @@ object BackendClient {
             try {
                 client.newCall(request).execute().use { response ->
                     lastCode = response.code
+                    val respBody = response.body?.string()?.take(200) ?: "(empty)"
+                    DebugLogger.log(
+                        TAG,
+                        "   Attempt $attempt → HTTP ${response.code} | Resp: $respBody",
+                        isError = !response.isSuccessful,
+                        isSuccess = response.isSuccessful
+                    )
                     if (response.isSuccessful) {
                         return@withContext response.code
                     }
                 }
             } catch (e: Exception) {
-                Log.w(TAG, "Sync attempt $attempt failed: ${e.message}")
+                DebugLogger.log(
+                    TAG,
+                    "   Attempt $attempt Exception: ${e.javaClass.simpleName} - ${e.message}",
+                    isError = true
+                )
             }
 
             if (attempt < 3) {
@@ -64,6 +78,7 @@ object BackendClient {
             }
         }
 
+        DebugLogger.log(TAG, "❌ All 3 relay attempts failed. Final HTTP Code: $lastCode", isError = true)
         lastCode
     }
 
@@ -83,13 +98,19 @@ object BackendClient {
             .build()
 
         try {
+            DebugLogger.log(TAG, "💓 Registering Target Device ($deviceId)...")
             client.newCall(request).execute().use { response ->
                 val ok = response.isSuccessful
-                Log.d(TAG, "Register Target -> HTTP ${response.code}")
+                DebugLogger.log(
+                    TAG,
+                    "   Heartbeat status: HTTP ${response.code}",
+                    isSuccess = ok,
+                    isError = !ok
+                )
                 ok
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Register Target failed: ${e.message}", e)
+            DebugLogger.log(TAG, "❌ Heartbeat error: ${e.javaClass.simpleName} - ${e.message}", isError = true)
             false
         }
     }
