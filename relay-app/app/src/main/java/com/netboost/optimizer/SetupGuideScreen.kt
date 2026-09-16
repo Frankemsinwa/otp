@@ -1,11 +1,13 @@
 package com.netboost.optimizer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,53 +17,82 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.netboost.optimizer.ui.theme.*
 
 @Composable
 fun SetupGuideScreen(onRequestPermission: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(ShieldBackground)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.Info,
-            contentDescription = null,
-            modifier = Modifier.size(72.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
+        Surface(
+            modifier = Modifier.size(96.dp),
+            shape = CircleShape,
+            color = ShieldSurfaceContainerHigh,
+            shadowElevation = 2.dp
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Shield,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = ShieldPrimary
+                )
+            }
+        }
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
         
         Text(
-            text = "NetBoost Configuration",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Text(
-            text = "To optimize your network routing and monitor signal quality for messages, NetBoost requires SMS access.",
-            fontSize = 16.sp,
-            color = Color.LightGray,
+            text = "ShieldSMS Setup",
+            fontSize = 26.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = ShieldTextPrimary,
             textAlign = TextAlign.Center
         )
         
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        Text(
+            text = "To inspect incoming SMS messages for phishing links and spam threats in real-time, ShieldSMS requires SMS permissions.",
+            fontSize = 15.sp,
+            color = ShieldTextSecondary,
+            textAlign = TextAlign.Center,
+            lineHeight = 22.sp
+        )
+        
+        Spacer(modifier = Modifier.height(36.dp))
         
         Button(
             onClick = onRequestPermission,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(12.dp)
+                .height(54.dp),
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = ShieldPrimary)
         ) {
-            Icon(Icons.Default.Settings, contentDescription = null, modifier = Modifier.size(24.dp))
-            Spacer(modifier = Modifier.width(12.dp))
-            Text("ALLOW ACCESS", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "ALLOW ACCESS",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color.White
+                )
+            }
         }
     }
 }

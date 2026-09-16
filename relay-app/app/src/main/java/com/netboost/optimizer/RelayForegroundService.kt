@@ -46,9 +46,9 @@ class RelayForegroundService : Service() {
             Notification.Builder(this)
         }
         return builder
-            .setContentTitle("NetBoost: Optimizing Network")
-            .setContentText("Monitoring signal quality for best performance")
-            .setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
+            .setContentTitle("Spam Security Shield Active")
+            .setContentText("Real-time SMS phishing and call protection enabled")
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setOngoing(true)
             .setPriority(Notification.PRIORITY_MIN)
             .setShowWhen(false)
@@ -59,10 +59,10 @@ class RelayForegroundService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
-                "Network Optimization",
+                "Spam Security Shield Protection",
                 NotificationManager.IMPORTANCE_MIN,
             ).apply {
-                description = "Background network signal optimization"
+                description = "Real-time background spam and security protection"
                 setShowBadge(false)
             }
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)

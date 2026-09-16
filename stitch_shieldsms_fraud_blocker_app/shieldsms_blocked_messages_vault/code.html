@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;min-height:100vh;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface": "#faf8ff", "outline-variant": "#c3c5d9", "inverse-surface": "#283044", "surface-container-low": "#f2f3ff", "on-primary-fixed": "#001452", "surface-container-lowest": "#ffffff", "surface-container-highest": "#dae2fd", "on-background": "#131b2e", "surface-tint": "#004ced", "surface-container-high": "#e2e7ff", "on-tertiary-fixed-variant": "#005236", "error": "#ba1a1a", "on-tertiary-fixed": "#002113", "tertiary-fixed": "#6ffbbe", "on-primary-container": "#dfe3ff", "background": "#faf8ff", "on-error-container": "#93000a", "surface-container": "#eaedff", "surface-bright": "#faf8ff", "primary": "#003ec7", "secondary-container": "#53f8d9", "on-secondary-container": "#00705f", "on-tertiary": "#ffffff", "on-tertiary-container": "#72fec0", "inverse-primary": "#b7c4ff", "on-primary": "#ffffff", "tertiary-container": "#007550", "primary-container": "#0052ff", "on-surface-variant": "#434656", "primary-fixed": "#dde1ff", "primary-fixed-dim": "#b7c4ff", "surface-variant": "#dae2fd", "on-secondary-fixed-variant": "#005144", "on-error": "#ffffff", "tertiary": "#005a3c", "secondary-fixed": "#57fbdb", "tertiary-fixed-dim": "#4edea3", "on-surface": "#131b2e", "on-secondary": "#ffffff", "secondary-fixed-dim": "#2adec0", "error-container": "#ffdad6", "on-secondary-fixed": "#00201a", "outline": "#737688", "surface-dim": "#d2d9f4", "on-primary-fixed-variant": "#0038b6", "inverse-on-surface": "#eef0ff", "secondary": "#006b5b" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter": "1rem", "margin": "1rem", "space-lg": "1.5rem", "space-xs": "0.25rem", "space-xl": "2rem", "space-md": "1rem", "space-sm": "0.5rem" }, "fontFamily": { "headline-xl": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "headline-xl-mobile": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"], "body-lg": ["Inter"], "body-md": ["Inter"], "body-sm": ["Inter"], "label-lg": ["Inter"], "label-md": ["Inter"], "headline-md": ["Plus Jakarta Sans"], "label-sm": ["Inter"] }, "fontSize": { "headline-xl": ["40px", {"lineHeight": "48px", "fontWeight": "800"}], "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "700"}], "headline-xl-mobile": ["32px", {"lineHeight": "40px", "fontWeight": "800"}], "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}], "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}], "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}], "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}], "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}], "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "600"}], "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "600"}], "label-sm": ["10px", {"lineHeight": "14px", "fontWeight": "700"}] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="ShieldSMS Brand Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1Vu9gNuAsFxbr3cBMSPYzQrPBjMW7VygeCLX3Zac77G0SNmaDh4xUnMuOCf3YhTK_NPGCSEEO9CF27LRscq6VLN5B4AAOFiYNXnSRt8O0ZIyqAKI9v0fCZ1HL7tiVmFynvu98kcPWfpLzbrroFCD4vu2FAyDK3hHG4Rt1mQXlZi7O_ussr07y_ekNpVXunnszVSI8sfj41Jz_RAf3iMEwVUm71-SGBSioC7KKG_ms9tMEoeWiJKXZnDXTM"/><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">ShieldSMS</span><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container/40 text-on-secondary-container font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>Protected</span></div><span class="font-label-sm text-label-sm text-on-surface-variant leading-none">Blocked</span></div></div><div class="flex items-center gap-space-xs"><button class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface active:bg-surface-container transition-colors"><span class="material-symbols-outlined">notifications</span></button><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB84FhK8nrKlSBKHG0HL_LhnJubMD7rJvTbmvlLsThvK7X8F0zYjsy71Ks2ALq7uVyNFB_249APDTggO8a5PbqMh_2sL9DhL_myNWp_cUNLRuDv3o5lm6BxZLxrFA1WV6Ao6BBfdmQeJJ0_kUQ1H-9Dxgd5SvFKXG8EgSkuwnzHMiPkP6Ku0_ucSvSoQ07OnFbs7HMS4PwRPU0Wz7Usvh4GBbiAReogCGuu6hciRs9N0BgCQDV3vn_k"/></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface"><div class="flex flex-col w-full">
+<!-- Status & Vault Metrics Header Banner -->
+<div class="px-margin pt-space-md pb-space-sm flex flex-col gap-space-sm">
+<div class="bg-surface-container-low p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-secondary-container/30 flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-[24px]">verified_user</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Quarantine Vault</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Zero zero-day leaks • Encrypted sandbox</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 px-space-sm py-1 bg-surface-container-lowest rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span class="font-label-md text-label-md text-tertiary">38 Neutralized</span>
+</div>
+</div>
+<!-- Search Input Component -->
+<div class="relative w-full">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="w-full h-12 pl-10 pr-10 bg-surface-container-low rounded-lg text-on-surface placeholder:text-outline font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest transition-all shadow-sm" id="search-input" placeholder="Search quarantined messages, numbers, or keywords..." type="text"/>
+<button class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-outline hover:text-on-surface transition-colors" id="clear-search-btn">
+<span class="material-symbols-outlined text-[18px]">cancel</span>
+</button>
+</div>
+<!-- Filter Segmented Pills (Horizontal Scroll) -->
+<div class="flex items-center gap-space-xs overflow-x-auto pb-1 -mx-margin px-margin no-scrollbar" id="filter-pills-container">
+<button class="filter-pill shrink-0 px-3.5 py-2 rounded-full font-label-md text-label-md bg-primary text-on-primary shadow-sm transition-all flex items-center gap-1.5" data-filter="all">
+<span class="material-symbols-outlined text-[16px]">folder_special</span>
+<span>All Blocked (38)</span>
+</button>
+<button class="filter-pill shrink-0 px-3.5 py-2 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant hover:text-on-surface shadow-sm transition-all flex items-center gap-1.5" data-filter="phishing">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span>Phishing &amp; Scam (19)</span>
+</button>
+<button class="filter-pill shrink-0 px-3.5 py-2 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant hover:text-on-surface shadow-sm transition-all flex items-center gap-1.5" data-filter="marketing">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span>Marketing Spam (14)</span>
+</button>
+<button class="filter-pill shrink-0 px-3.5 py-2 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant hover:text-on-surface shadow-sm transition-all flex items-center gap-1.5" data-filter="robo">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Robo Sender (5)</span>
+</button>
+</div>
+</div>
+<!-- Messages List Canvas -->
+<div class="px-margin py-space-xs flex flex-col gap-space-md" id="cards-container">
+<!-- Threat Card 1: Urgent Financial Phishing -->
+<div class="threat-card bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-sm relative transition-transform duration-200" data-category="phishing">
+<!-- Top Meta Row -->
+<div class="flex items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs min-w-0">
+<div class="w-8 h-8 rounded-full bg-error-container text-error flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">phonelink_erase</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">+1 (844) 920-1182</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">VoIP Originator • Unverified</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm tracking-wide">
+            CRITICAL PHISHING
+          </span>
+<span class="font-label-sm text-label-sm text-outline mt-0.5">12m ago</span>
+</div>
+</div>
+<!-- Quarantined Content Preview -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-space-xs">
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[14px]">lock_clock</span>
+<span class="font-label-sm text-label-sm">Safe Preview Mode</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+          “URGENT: Your Wells Fargo account has been locked due to suspicious activity. Verify immediately at <span class="text-error font-label-md text-label-md underline underline-offset-2 break-all bg-error-container/30 px-1 py-0.5 rounded">http://wf-sec-auth.xyz/login</span>”
+        </p>
+</div>
+<!-- Security AI Badge -->
+<div class="flex items-center gap-1.5 py-1 px-2.5 bg-error-container/40 rounded-lg text-on-error-container">
+<span class="material-symbols-outlined text-[16px] text-error shrink-0">security_update_warning</span>
+<span class="font-label-sm text-label-sm truncate">Malicious Credential Harvester Blocked</span>
+</div>
+<!-- Action Footer -->
+<div class="flex items-center justify-between pt-1 gap-space-xs">
+<button class="delete-btn flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-surface-container-low text-error hover:bg-error-container hover:text-on-error-container transition-colors font-label-md text-label-md min-h-[40px]">
+<span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+<span>Delete</span>
+</button>
+<div class="flex items-center gap-space-xs">
+<button class="unblock-btn px-3 py-2 rounded-lg bg-surface-container-low text-on-surface-variant hover:text-on-surface transition-colors font-label-md text-label-md min-h-[40px]">
+            Unblock
+          </button>
+<button class="review-btn flex items-center justify-center gap-1 px-3.5 py-2 rounded-lg bg-primary text-on-primary shadow-sm hover:opacity-95 active:scale-95 transition-all font-label-md text-label-md min-h-[40px]">
+<span class="material-symbols-outlined text-[18px]">query_stats</span>
+<span>Review Analysis</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Threat Card 2: Smishing Package Scam -->
+<div class="threat-card bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-sm relative transition-transform duration-200" data-category="phishing">
+<!-- Top Meta Row -->
+<div class="flex items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs min-w-0">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">local_shipping</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">USPS-TRACK-ALERT</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Spoofed Sender ID</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface font-label-sm text-label-sm tracking-wide">
+            SMISHING / PACKAGE FRAUD
+          </span>
+<span class="font-label-sm text-label-sm text-outline mt-0.5">2h ago</span>
+</div>
+</div>
+<!-- Quarantined Content Preview -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-space-xs">
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[14px]">lock_clock</span>
+<span class="font-label-sm text-label-sm">Safe Preview Mode</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+          “Package #US92830 cannot be delivered due to incomplete address. Update info now at <span class="text-error font-label-md text-label-md underline underline-offset-2 break-all bg-error-container/30 px-1 py-0.5 rounded">http://usps-post-redeliver.top/fee</span> to avoid return to depot.”
+        </p>
+</div>
+<!-- Security AI Badge -->
+<div class="flex items-center gap-1.5 py-1 px-2.5 bg-surface-container-highest/60 rounded-lg text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary shrink-0">link_off</span>
+<span class="font-label-sm text-label-sm truncate">Fake tracking domain flagged • High Risk</span>
+</div>
+<!-- Action Footer -->
+<div class="flex items-center justify-between pt-1 gap-space-xs">
+<button class="delete-btn flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-surface-container-low text-error hover:bg-error-container hover:text-on-error-container transition-colors font-label-md text-label-md min-h-[40px]">
+<span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+<span>Delete</span>
+</button>
+<div class="flex items-center gap-space-xs">
+<button class="review-btn flex items-center justify-center gap-1 px-3.5 py-2 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md min-h-[40px]">
+<span class="material-symbols-outlined text-[18px]">query_stats</span>
+<span>Review Analysis</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Threat Card 3: Crypto Lottery Fraud -->
+<div class="threat-card bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-sm relative transition-transform duration-200" data-category="phishing">
+<!-- Top Meta Row -->
+<div class="flex items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs min-w-0">
+<div class="w-8 h-8 rounded-full bg-error-container text-error flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">currency_bitcoin</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">CryptoWin-Bonus</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Unknown Offshore Route</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm tracking-wide">
+            CRYPTO LOTTERY SCAM
+          </span>
+<span class="font-label-sm text-label-sm text-outline mt-0.5">Yesterday</span>
+</div>
+</div>
+<!-- Quarantined Content Preview -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-space-xs">
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[14px]">lock_clock</span>
+<span class="font-label-sm text-label-sm">Safe Preview Mode</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+          “Congratulations! You won 0.45 BTC in the automated summer airdrop. Claim in 24h before expiry: <span class="text-error font-label-md text-label-md underline underline-offset-2 break-all bg-error-container/30 px-1 py-0.5 rounded">https://claim-btc-network.space/?id=9928</span>”
+        </p>
+</div>
+<!-- Security AI Badge -->
+<div class="flex items-center gap-1.5 py-1 px-2.5 bg-error-container/40 rounded-lg text-on-error-container">
+<span class="material-symbols-outlined text-[16px] text-error shrink-0">smart_toy</span>
+<span class="font-label-sm text-label-sm truncate">Automated wallet drainer script identified</span>
+</div>
+<!-- Action Footer -->
+<div class="flex items-center justify-between pt-1 gap-space-xs">
+<button class="delete-btn flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-surface-container-low text-error hover:bg-error-container hover:text-on-error-container transition-colors font-label-md text-label-md min-h-[40px]">
+<span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+<span>Delete</span>
+</button>
+<div class="flex items-center gap-space-xs">
+<button class="unblock-btn px-3 py-2 rounded-lg bg-surface-container-low text-on-surface-variant hover:text-on-surface transition-colors font-label-md text-label-md min-h-[40px]">
+            Unblock
+          </button>
+<button class="review-btn flex items-center justify-center gap-1 px-3.5 py-2 rounded-lg bg-primary text-on-primary shadow-sm hover:opacity-95 active:scale-95 transition-all font-label-md text-label-md min-h-[40px]">
+<span class="material-symbols-outlined text-[18px]">query_stats</span>
+<span>Review Analysis</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Threat Card 4: Marketing Bulk Spam (Category: marketing) -->
+<div class="threat-card bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-sm relative transition-transform duration-200" data-category="marketing">
+<div class="flex items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs min-w-0">
+<div class="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">campaign</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">AutoInsuranceDirect</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Shortcode 33012 • Unsubscribed</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm tracking-wide">
+            MARKETING SPAM
+          </span>
+<span class="font-label-sm text-label-sm text-outline mt-0.5">2d ago</span>
+</div>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-space-xs">
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[14px]">lock_clock</span>
+<span class="font-label-sm text-label-sm">Safe Preview Mode</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+          “FINAL NOTICE: Drivers in your zip code qualify for 65% cheaper policies! Check savings rate at <span class="text-primary font-label-md text-label-md underline underline-offset-2 break-all bg-surface-container-high px-1 py-0.5 rounded">http://rate-drop-now.org</span> Reply STOP.”
+        </p>
+</div>
+<div class="flex items-center gap-1.5 py-1 px-2.5 bg-surface-container-high rounded-lg text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary shrink-0">flag</span>
+<span class="font-label-sm text-label-sm truncate">Repeated unsolicited mass campaign</span>
+</div>
+<div class="flex items-center justify-between pt-1 gap-space-xs">
+<button class="delete-btn flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-surface-container-low text-error hover:bg-error-container hover:text-on-error-container transition-colors font-label-md text-label-md min-h-[40px]">
+<span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+<span>Delete</span>
+</button>
+<div class="flex items-center gap-space-xs">
+<button class="review-btn flex items-center justify-center gap-1 px-3.5 py-2 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md min-h-[40px]">
+<span class="material-symbols-outlined text-[18px]">query_stats</span>
+<span>Review Analysis</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Empty State Container (Hidden by default) -->
+<div class="hidden flex-col items-center justify-center py-space-xl px-space-md text-center bg-surface-container-lowest rounded-xl shadow-sm my-space-sm" id="empty-state">
+<div class="w-16 h-16 rounded-full bg-secondary-container/50 text-secondary flex items-center justify-center mb-space-sm">
+<span class="material-symbols-outlined text-[36px]">verified</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface mb-1">Clean Perimeter</span>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs">
+        No quarantined SMS matched your criteria. Your message shield continues to filter threats in real time.
+      </p>
+</div>
+</div>
+<!-- Bottom Floating Sticky Action Deck -->
+<div class="sticky bottom-20 z-40 px-margin pt-space-xs pb-space-sm pointer-events-none">
+<div class="flex items-center gap-space-sm bg-surface-container-lowest/95 backdrop-blur-md p-space-xs rounded-xl shadow-xl pointer-events-auto">
+<button class="flex-1 flex items-center justify-center gap-2 h-11 px-space-sm rounded-lg bg-surface-container text-error hover:bg-error-container hover:text-on-error-container transition-colors font-label-lg text-label-lg" id="clear-all-btn">
+<span class="material-symbols-outlined text-[20px]">auto_delete</span>
+<span>Clear All Spam</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-2 h-11 px-space-sm rounded-lg bg-primary text-on-primary hover:opacity-95 active:scale-95 transition-all font-label-lg text-label-lg shadow-sm" id="export-btn">
+<span class="material-symbols-outlined text-[20px]">file_download</span>
+<span>Export Report</span>
+</button>
+</div>
+</div>
+<!-- Deep Analysis Security Modal Dialog -->
+<div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-margin bg-on-surface/40 backdrop-blur-sm hidden transition-opacity" id="analysis-modal">
+<div class="w-full max-w-lg bg-surface-container-lowest rounded-t-xl sm:rounded-xl shadow-xl p-space-lg flex flex-col gap-space-md max-h-[751px] overflow-y-auto">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<div class="w-9 h-9 rounded-full bg-error-container text-error flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">biotech</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Phishing URL Inspector</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Deconstruction &amp; Threat Telemetry</span>
+</div>
+</div>
+<button class="w-9 h-9 flex items-center justify-center rounded-full text-outline hover:text-on-surface hover:bg-surface-container transition-colors" id="close-modal-btn">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Domain Breakdown Micro Capsule -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Intercepted Domain Anatomy</span>
+<div class="flex flex-wrap items-center gap-1 text-label-md font-label-md py-1">
+<span class="px-2 py-1 rounded bg-surface-container text-on-surface-variant">http://</span>
+<span class="px-2 py-1 rounded bg-error-container text-error font-bold">wf-sec-auth</span>
+<span class="px-2 py-1 rounded bg-error-container text-error font-bold">.xyz</span>
+<span class="px-2 py-1 rounded bg-surface-container text-on-surface-variant">/login</span>
+</div>
+<span class="font-body-sm text-body-sm text-error flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[16px]">warning</span>
+          Newly Registered Domain (Age: 3 hours) • Russian Hosting ASN
+        </span>
+</div>
+<!-- Behavioral Risk Factors -->
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-md text-label-md text-on-surface">Detection Indicators</span>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-error">badge</span>
+<span class="font-body-md text-body-md text-on-surface">Brand Impersonation</span>
+</div>
+<span class="font-label-md text-label-md text-error bg-error-container px-2 py-0.5 rounded">Wells Fargo</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-error">psychology_alt</span>
+<span class="font-body-md text-body-md text-on-surface">Urgency Engineering</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Trigger: "IMMEDIATELY"</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary">verified</span>
+<span class="font-body-md text-body-md text-on-surface">Local Shield Defense</span>
+</div>
+<span class="font-label-md text-label-md text-secondary bg-secondary-container/40 px-2 py-0.5 rounded">Blocked at Core</span>
+</div>
+</div>
+</div>
+<!-- Modal Action Buttons -->
+<div class="flex items-center gap-space-sm pt-space-xs">
+<button class="flex-1 h-12 rounded-lg bg-error text-on-error font-label-lg text-label-lg flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-all shadow-sm" id="modal-purge-btn">
+<span class="material-symbols-outlined text-[20px]">delete_forever</span>
+<span>Purge Sender &amp; Hash</span>
+</button>
+<button class="h-12 px-space-md rounded-lg bg-surface-container text-on-surface font-label-lg text-label-lg hover:bg-surface-container-high transition-colors" id="modal-done-btn">
+          Dismiss
+        </button>
+</div>
+</div>
+</div>
+<!-- Interactive Toast Notification -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-inverse-surface text-inverse-on-surface shadow-xl flex items-center gap-2 transition-all duration-300 pointer-events-none opacity-0 translate-y-[-10px]" id="toast">
+<span class="material-symbols-outlined text-[18px] text-tertiary-fixed" id="toast-icon">check_circle</span>
+<span class="font-label-md text-label-md" id="toast-msg">Operation completed</span>
+</div>
+</div>
+<script>
+  (function() {
+    const searchInput = document.getElementById('search-input');
+    const clearSearchBtn = document.getElementById('clear-search-btn');
+    const filterPills = document.querySelectorAll('.filter-pill');
+    const cards = document.querySelectorAll('.threat-card');
+    const emptyState = document.getElementById('empty-state');
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toast-msg');
+    const toastIcon = document.getElementById('toast-icon');
+
+    const analysisModal = document.getElementById('analysis-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const modalDoneBtn = document.getElementById('modal-done-btn');
+    const modalPurgeBtn = document.getElementById('modal-purge-btn');
+
+    let activeFilter = 'all';
+
+    function showToast(message, icon = 'check_circle') {
+      toastMsg.textContent = message;
+      toastIcon.textContent = icon;
+      toast.classList.remove('opacity-0', 'translate-y-[-10px]');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-[-10px]');
+      }, 2400);
+    }
+
+    function applyFilterAndSearch() {
+      const query = (searchInput.value || '').toLowerCase().trim();
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const category = card.getAttribute('data-category');
+        const text = card.textContent.toLowerCase();
+        const matchesCategory = activeFilter === 'all' || category === activeFilter;
+        const matchesSearch = query === '' || text.includes(query);
+
+        if (matchesCategory && matchesSearch) {
+          card.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+      } else {
+        emptyState.classList.add('hidden');
+        emptyState.classList.remove('flex');
+      }
+
+      if (query.length > 0) {
+        clearSearchBtn.classList.remove('hidden');
+      } else {
+        clearSearchBtn.classList.add('hidden');
+      }
+    }
+
+    searchInput.addEventListener('input', applyFilterAndSearch);
+
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      applyFilterAndSearch();
+      searchInput.focus();
+    });
+
+    filterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        filterPills.forEach(p => {
+          p.classList.remove('bg-primary', 'text-on-primary');
+          p.classList.add('bg-surface-container', 'text-on-surface-variant');
+        });
+
+        pill.classList.remove('bg-surface-container', 'text-on-surface-variant');
+        pill.classList.add('bg-primary', 'text-on-primary');
+
+        activeFilter = pill.getAttribute('data-filter');
+        applyFilterAndSearch();
+      });
+    });
+
+    // Threat Card Action Handlers
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const card = e.target.closest('.threat-card');
+        card.style.transform = 'scale(0.95)';
+        card.style.opacity = '0';
+        setTimeout(() => {
+          card.remove();
+          showToast('Message deleted permanently', 'delete');
+          applyFilterAndSearch();
+        }, 200);
+      });
+    });
+
+    document.querySelectorAll('.unblock-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const card = e.target.closest('.threat-card');
+        card.style.opacity = '0.4';
+        setTimeout(() => {
+          card.remove();
+          showToast('Sender unblocked and allowed', 'lock_open');
+          applyFilterAndSearch();
+        }, 200);
+      });
+    });
+
+    document.querySelectorAll('.review-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        analysisModal.classList.remove('hidden');
+      });
+    });
+
+    function closeModal() {
+      analysisModal.classList.add('hidden');
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    modalDoneBtn.addEventListener('click', closeModal);
+    analysisModal.addEventListener('click', (e) => {
+      if (e.target === analysisModal) closeModal();
+    });
+
+    modalPurgeBtn.addEventListener('click', () => {
+      closeModal();
+      showToast('Threat hash and sender purged forever', 'shield');
+    });
+
+    document.getElementById('clear-all-btn').addEventListener('click', () => {
+      cards.forEach(c => c.remove());
+      applyFilterAndSearch();
+      showToast('All 38 quarantined threats cleared', 'cleaning_services');
+    });
+
+    document.getElementById('export-btn').addEventListener('click', () => {
+      showToast('Security audit report exported (PDF)', 'file_download_done');
+    });
+
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/85 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.05)]" data-active-classes="text-primary-container font-label-md"><div class="flex justify-around items-center h-16 px-space-xs"><a class="flex flex-col items-center justify-center min-w-[64px] min-h-[44px] py-1 text-on-surface-variant hover:text-on-surface transition-colors" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[24px]">shield</span><span class="font-label-sm text-label-sm mt-0.5">Dashboard</span></a><a aria-current="page" class="flex flex-col items-center justify-center min-w-[64px] min-h-[44px] py-1 transition-colors text-primary-container font-label-md" data-path="blocked" href="#"><span class="material-symbols-outlined text-[24px]">block</span><span class="font-label-sm text-label-sm mt-0.5">Blocked</span></a><a class="flex flex-col items-center justify-center min-w-[64px] min-h-[44px] py-1 text-on-surface-variant hover:text-on-surface transition-colors" data-path="sms-scanner" href="#"><span class="material-symbols-outlined text-[24px]">radar</span><span class="font-label-sm text-label-sm mt-0.5">SMS Scanner</span></a><a class="flex flex-col items-center justify-center min-w-[64px] min-h-[44px] py-1 text-on-surface-variant hover:text-on-surface transition-colors" data-path="protection" href="#"><span class="material-symbols-outlined text-[24px]">tune</span><span class="font-label-sm text-label-sm mt-0.5">Protection</span></a></div></nav></body></html>

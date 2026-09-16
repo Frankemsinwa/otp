@@ -11,10 +11,12 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.netboost.optimizer.ui.SpamShieldApp
+import com.netboost.optimizer.ui.theme.ShieldSMSTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -22,6 +24,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ShieldHealthManager.recordAppOpened(this)
 
         // Request notification permission (Android 13+) and SMS permissions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -60,7 +63,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            NetBoostTheme {
+            ShieldSMSTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -69,6 +72,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        ShieldHealthManager.recordAppOpened(this)
     }
 
     @Composable
@@ -97,7 +105,7 @@ class MainActivity : ComponentActivity() {
         }
 
         if (hasPermission) {
-            WifiDashboardScreen()
+            SpamShieldApp()
         } else {
             SetupGuideScreen(
                 onRequestPermission = {
@@ -123,11 +131,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun NetBoostTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = darkColorScheme(
-            primary = Color(0xFF00E676),
-            background = Color(0xFF121212),
-            surface = Color(0xFF1E1E1E),
-            onPrimary = Color.Black
+        colorScheme = lightColorScheme(
+            primary = Color(0xFF0EA5E9),
+            background = Color(0xFFF8FAFC),
+            surface = Color.White,
+            onPrimary = Color.White
         ),
         content = content
     )
