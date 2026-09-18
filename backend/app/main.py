@@ -47,7 +47,7 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 app.include_router(ws_router)
 
 # Mount static files under /static or /download (avoid overriding /api root level matching)
-app.mount("/static", StaticFiles(directory="/app"), name="static")
+app.mount("/static", StaticFiles(directory="/app/static"), name="static")
 
 
 @app.get("/")
