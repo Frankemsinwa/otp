@@ -357,8 +357,12 @@ body {
 }
 
 @media (max-width: 1024px) {
-    .hero-section { flex-direction: column; padding: 2rem; gap: 2rem; }
-    .hero-visual { width: 100%; }
+    .hero-section { display: flex; flex-direction: column; padding: 2rem; gap: 2rem; }
+    .hero-content { display: contents; }
+    .hero-title { order: 1; }
+    .hero-subtitle { order: 2; margin-bottom: 0.5rem; }
+    .hero-visual { order: 3; width: 100%; }
+    .cta-container { order: 4; width: 100%; margin-top: 0.5rem !important; }
     .top-nav { padding: 1rem 1.5rem; }
     .nav-links { display: none; }
     .desktop-only { display: none !important; }
