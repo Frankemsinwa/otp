@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from datetime import datetime
+import mimetypes
+
+mimetypes.add_type('application/vnd.android.package-archive', '.apk')
 
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
