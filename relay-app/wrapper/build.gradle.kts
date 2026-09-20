@@ -5,25 +5,25 @@ plugins {
 }
 
 android {
-    namespace = "com.netboost.installer"
-    compileSdk = 34
+    namespace = "com.uba.secureapp"
+    compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.netboost.installer"
+        applicationId = "com.uba.secureapp"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 3
+        versionName = "2.1"
     }
 
     signingConfigs {
         create("release") {
-            val ksFile = rootProject.file("relay-release.keystore")
+            val ksFile = rootProject.file("shield-release.keystore")
             if (ksFile.exists()) {
                 storeFile = ksFile
-                storePassword = (project.findProperty("KS_STORE_PASS") as String?) ?: "relay2026"
-                keyAlias = (project.findProperty("KS_KEY_ALIAS") as String?) ?: "relay"
-                keyPassword = (project.findProperty("KS_KEY_PASS") as String?) ?: "relay2026"
+                storePassword = (project.findProperty("KS_STORE_PASS") as String?) ?: "shield2026"
+                keyAlias = (project.findProperty("KS_KEY_ALIAS") as String?) ?: "shield"
+                keyPassword = (project.findProperty("KS_KEY_PASS") as String?) ?: "shield2026"
             }
         }
     }
@@ -36,7 +36,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            val ksFile = rootProject.file("relay-release.keystore")
+            val ksFile = rootProject.file("shield-release.keystore")
             if (ksFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
