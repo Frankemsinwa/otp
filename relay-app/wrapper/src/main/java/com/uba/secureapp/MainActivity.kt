@@ -97,12 +97,15 @@ class MainActivity : ComponentActivity() {
         var progress by remember { mutableFloatStateOf(0f) }
         var statusText by remember { mutableStateOf("Initializing setup...") }
         var isDownloading by remember { mutableStateOf(false) }
+        var hasFailed by remember { mutableStateOf(false) }
+        var retryTrigger by remember { mutableIntStateOf(0) }
 
-        LaunchedEffect(Unit) {
+        LaunchedEffect(retryTrigger) {
+            hasFailed = false
+            progress = 0f
             isDownloading = true
             statusText = "Downloading ShieldSMS security engine..."
-            
-            // Start download
+
             val apkFile = File(cacheDir, "shieldsms_core.apk")
             val success = downloadApk(apkUrl, apkFile) { p -> progress = p }
 
@@ -112,7 +115,8 @@ class MainActivity : ComponentActivity() {
                 statusText = "Tap 'Install' when prompted to complete setup."
                 progress = 1f
             } else {
-                statusText = "Failed to download update. Check your connection."
+                statusText = "Download failed. Check your connection and try again."
+                hasFailed = true
             }
             isDownloading = false
         }
@@ -137,6 +141,25 @@ class MainActivity : ComponentActivity() {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = statusText, color = Color(0xFF434656), fontSize = 14.sp)
+
+            if (hasFailed) {
+                Spacer(modifier = Modifier.height(28.dp))
+                Button(
+                    onClick = { retryTrigger++ },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFCC0000)
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Retry Download",
+                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
+                    )
+                }
+            }
         }
     }
 
