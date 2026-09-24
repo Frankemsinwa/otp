@@ -349,6 +349,39 @@ body {
     transform: scale(1.1);
 }
 
+.steps-intro {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 1.2rem;
+    font-style: italic;
+    border-left: 3px solid var(--red);
+    padding-left: 0.75rem;
+}
+
+.steps-list li {
+    margin-bottom: 0.9rem;
+    line-height: 1.65;
+}
+
+.steps-list li strong {
+    color: var(--text-main);
+    display: block;
+    margin-bottom: 0.2rem;
+}
+
+.steps-list li em {
+    background: rgba(204, 0, 0, 0.08);
+    border-radius: 4px;
+    padding: 0 4px;
+    font-style: normal;
+    font-weight: 500;
+}
+
+.highlight-red {
+    color: #cc0000;
+    font-weight: 700;
+}
+
 .mobile-menu-btn {
     display: none;
     font-size: 1.5rem;
